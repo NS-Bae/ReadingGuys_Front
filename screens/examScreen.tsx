@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, useWindowDimensions } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StackParamList } from '../types.tsx';
+/* import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+ */import { StackParamList } from '../types.tsx';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { unzip } from 'react-native-zip-archive';
 import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
@@ -10,39 +10,55 @@ import Styles from '../mainStyle.tsx';
 import ExamSplitScreen from '../Components/examSplitScreen.tsx';
 import ExamFullScreen from '../Components/examFullScreen.tsx';
 
-type ExamScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Exam'>;
-type ExamScreenRouteProp = RouteProp<StackParamList, 'Exam'>;
-
-interface ExamScreenProps
+/* type ExamScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Exam'>;
+ */type ExamScreenRouteProp = RouteProp<StackParamList, 'Exam'>;
+/* type TxtFile = {
+  name: string;
+  content: string;
+}; */
+/* interface ExamScreenProps
 {
   navigation: ExamScreenNavigationProps;
 }
-
-function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
+ */
+function ExamScreen(/* { navigation } : ExamScreenProps */): React.JSX.Element
 {
   const { width } = useWindowDimensions();
   const styles = Styles(width);
   const route = useRoute<ExamScreenRouteProp>();
   const { ExamBook } = route.params;
 
-  console.log(ExamBook.storageLink);
+  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [fileContents, setFileContents] = useState<string[]>([]);
 
   async function handleZipFile(filePath: string)
   {
+    console.log('b');
     try
     {
       const targetPath = `${DocumentDirectoryPath}/unzipped`;
       const unzippedPath = await unzip(filePath, targetPath);
       const files = await RNFS.readDir(unzippedPath);
+      const firstFolder = files.find(item => item.isDirectory());
 
-      for (const file of files)
+      if(firstFolder)
       {
-        if (file.isFile()) {
-          console.log('파일 이름:', file.name);
+        const folderPath = firstFolder.path;
+        console.log('폴더 경로a:', folderPath);
+        const innerFiles = await RNFS.readDir(folderPath);
 
-          const content = await RNFS.readFile(file.path, 'utf8');
-          console.log('내용:', content);
-        }
+        const fileName = innerFiles
+          .filter(item => item.isFile() && item.name.endsWith('.txt')) // .txt 파일만
+          .map(item => item.name.replace(/\.txt$/, ''));
+
+        setFileNames(fileName);
+
+        const fileContent = innerFiles.map(async item => {
+          const content = await RNFS.readFile(item.path, 'utf8');
+          return content;
+        });
+        const tempAllfiles = await Promise.all(fileContent);
+        setFileContents(tempAllfiles);
       }
     }
     catch(error)
@@ -54,7 +70,8 @@ function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
   useEffect(() => {
     const filePath = ExamBook.storageLink;
     handleZipFile(filePath);
-  }, []);
+    console.log('a');
+  }, [ExamBook]);
 
   return (
     <SafeAreaView style={styles.basic}>
@@ -62,7 +79,7 @@ function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
         {width > 600 ? ( //분할화면
           <ExamSplitScreen />
         ) : ( //전체화면
-          <ExamFullScreen />
+          <ExamFullScreen fileNames={fileNames} fileContents={fileContents}/>
         )}
       </View>
     </SafeAreaView>
