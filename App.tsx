@@ -11,8 +11,9 @@ import HomeScreen from './screens/homeScreen';
 import LoginScreen from './screens/loginScreen';
 import MainScreen from './screens/mainScreen2';
 import CheckRecordScreen from './screens/fullScreen_CheckRecord.tsx';
-import ExamScreen from './screens/examScreen';/*
-import api from './api'; */
+import ExamScreen from './screens/examScreen';
+import ExamResult from './screens/examResult.tsx';
+/*import api from './api'; */
 
 import { StackParamList } from './types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -151,6 +152,7 @@ const App: React.FC = () => {
           <Stack.Screen name="Main" component={MainScreen} initialParams={{ inputs: { ip1: '', ip2: '' } }} options={{headerShown: false}} />
           <Stack.Screen name="Record" component={CheckRecordScreen} options={{headerShown: false}} />
           <Stack.Screen name="Exam" component={ExamScreen} options={{headerShown: false}} />
+          <Stack.Screen name="Result" component={ExamResult} options={{headerShown: false}} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

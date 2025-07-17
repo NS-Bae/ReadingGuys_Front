@@ -3,7 +3,10 @@ import { SafeAreaView, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackParamList } from '../types.tsx';
 import { AxiosError } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
+
+import { BookData } from '../types.tsx';
 
 import Styles from '../mainStyle.tsx';
 import BookScroll from '../Components/bookScroll.tsx';
@@ -55,18 +58,17 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
       console.log('b',axiosError);
     }
   }, [userInfo]);
+  //
   const fetchUserInfo = async () => {
     try
     {
-      const storedUserInfo = await AsyncStorage.getItem('userInfo');
+      const storedUserInfo = await getUserInfo();
 
       if (storedUserInfo)
       {
-        const parsedUserInfo = JSON.parse(storedUserInfo);
-
-        if (parsedUserInfo && parsedUserInfo.AcademyID)
+        if (storedUserInfo && storedUserInfo.AcademyID)
         {
-          setUserInfo(parsedUserInfo);
+          setUserInfo(storedUserInfo);
         }
         else
         {
@@ -84,7 +86,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
     }
   };
 
-  const selectCheck = (bookinfo: string, RecordList: Records[], RecordCount: number) => {
+  const selectCheck = (bookinfo: BookData, RecordList: Records[], RecordCount: number) => {
     setBookInfo(bookinfo);
     setRecordList(RecordList);
     setRecordCount(RecordCount);
@@ -145,6 +147,5 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
     </SafeAreaView>
   );
 }
-
 
 export default Ms;

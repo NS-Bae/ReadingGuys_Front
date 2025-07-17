@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 
 import Styles from '../mainStyle.tsx';
 import Mt from './text.tsx';
@@ -93,7 +94,7 @@ const exclusiveStyles = StyleSheet.create({
     width: '100%',
   },
   normal: {
-    fontSize: 27,
+    fontSize: moderateScale(20),
     textAlign: 'left',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -102,7 +103,7 @@ const exclusiveStyles = StyleSheet.create({
     padding: 0,
   },
   infotext: {
-    fontSize: 25,
+    fontSize: moderateScale(20),
     color: 'black',
     fontWeight: 'bold',
   },
@@ -110,8 +111,6 @@ const exclusiveStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     width: '100%',
-    paddingRight: 10,
-    paddingLeft: 10,
     paddingBottom: 30,
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -119,7 +118,7 @@ const exclusiveStyles = StyleSheet.create({
   gotoexambutton: {
     width: '80%',
     alignItems: 'center',
-    fontSize: 15,
+    fontSize: moderateScale(20),
   },
 });
 

@@ -20,6 +20,9 @@ const styles = (width: number) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollContent2: {
+    flexGrow: 1,
+  },
   splitScreen: {
     flexDirection: 'row',
     width: '100%',

@@ -42,7 +42,6 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({ isVisible, onClos
     movePage(value);
   };
   const handleRecord = () => {
-    console.log('record');
     const value = 'record';
     movePage(value);
   };

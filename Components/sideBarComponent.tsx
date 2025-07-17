@@ -1,27 +1,33 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { moderateScale } from 'react-native-size-matters';
 
 interface DrawerContentProps {
   toggleTestDrawer: (i: number) => void;
-  toggleCloseDrawer: () => void;
+  toggleCloseDrawer?: () => void;
   fileNames: string[];
+  screenType: string;
 }
 
-const DrawerContent: React.FC<DrawerContentProps> = ({ toggleTestDrawer, toggleCloseDrawer, fileNames }) => {
+const DrawerContent: React.FC<DrawerContentProps> = ({ toggleTestDrawer, toggleCloseDrawer, fileNames, screenType }) => {
   return (
-    <SafeAreaView  style={styles.drawerContent}>
+    <SafeAreaView style={styles.drawerContent}>
       <ScrollView style={styles.topPlace}>
         <Text style={styles.drawerHeadText}>시험 리스트</Text>
-        {Array.from({ length: fileNames.length }, (_, i) => (
+        {Array.from({ length: fileNames.length + 1 }, (_, i) => (
           <TouchableOpacity key={i} onPress={() => toggleTestDrawer(i)} style={styles.contentButton}>
-            <Text style={styles.drawerText}>{fileNames[i]}</Text>
+            { i < fileNames.length ?
+              (<Text style={styles.drawerText}>{fileNames[i]}</Text>) :
+              (<Text style={styles.drawerText}>{i + 1}. 시험 종료</Text>)}
           </TouchableOpacity>
         ))}
       </ScrollView >
-      <TouchableOpacity key="close" onPress={toggleCloseDrawer} style={styles.closeButton}>
+      { screenType === 'full' &&
+        <TouchableOpacity key="close" onPress={toggleCloseDrawer} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>닫기</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      }
     </SafeAreaView >
   );
 };
@@ -46,12 +52,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   drawerText: {
-    fontSize: 25,
+    fontSize: moderateScale(20),
     color: '#fff',
     marginLeft: 10,
   },
   closeButtonText: {
-    fontSize: 30,
+    fontSize: moderateScale(20),
     color: '#fff',
     textAlign: 'center',
   },

@@ -3,7 +3,7 @@ import { TextStyle, TextInput } from 'react-native';
 import { TextInputProps } from 'react-native-paper';
 
 interface TiProps extends TextInputProps {
-  style? : TextStyle; //물음표는 선택적이다 값이 있을수도 없을수도 있다는 의미
+  style? : TextStyle;
   placeholder? : string;
   secureTextEntry? : boolean;
 }

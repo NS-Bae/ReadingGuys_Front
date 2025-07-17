@@ -5,6 +5,7 @@ import Collapsible from 'react-native-collapsible';
 import Styles from '../mainStyle.tsx';
 import Mt from './text.tsx';
 import RecordItem from './recordItem.tsx';
+import { moderateScale } from 'react-native-size-matters';
 
 interface ExamRecord {
   ExamDate: string;
@@ -71,7 +72,7 @@ const exclusiveStyles = StyleSheet.create({
 
   },
   normal: {
-    fontSize: 27,
+    fontSize: moderateScale(27),
     textAlign: 'left',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -80,7 +81,7 @@ const exclusiveStyles = StyleSheet.create({
     padding: 0,
   },
   small: {
-    fontSize: 15,
+    fontSize: moderateScale(15),
     textAlign: 'left',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -89,7 +90,7 @@ const exclusiveStyles = StyleSheet.create({
     padding: 0,
   },
   infotext: {
-    fontSize: 15,
+    fontSize: moderateScale(15),
     color: 'black',
     paddingTop: 5,
   },

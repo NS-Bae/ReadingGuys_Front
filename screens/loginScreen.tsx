@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackParamList } from '../types.tsx';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { registTokenAndInfo } from '../utils/userAsyncStorageFunction.tsx';
 
 import Bb from '../Components/btn.tsx';
 import Styles from '../mainStyle.tsx';
@@ -44,19 +45,14 @@ function LoginScreen({ navigation } : LoginScreenProps): React.JSX.Element {
     {
       try
       {
-        const response = await api.post('/auth/login',
-          inputs,
-        );
+        const response = await api.post('/auth/login', inputs);
         if(response.status === 201 )
         {
           console.log(inputs, '성공');
           setSsa(true);
           const token = response.data.accessToken;
           const userInfo = response.data.userInfo;
-          console.log('토큰 생성 완료');
-
-          await AsyncStorage.setItem('userToken', token);
-          await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+          await registTokenAndInfo(token, userInfo);
         }
         else
         {

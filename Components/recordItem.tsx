@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 
 interface RecordItemProps {
   examDate: string;
@@ -35,11 +36,11 @@ const exclusiveStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   infotext: {
-    fontSize: 15,
+    fontSize: moderateScale(13),
     color: 'black',
   },
   btntext: {
-    fontSize: 15,
+    fontSize: moderateScale(13),
     color: 'black',
     alignItems: 'center',
   },
@@ -60,7 +61,7 @@ const exclusiveStyles = StyleSheet.create({
     padding: 5,
     paddingBottom: 5,
     borderRadius: 5,
-    fontSize: 15,
+    fontSize: moderateScale(13),
     color: 'black',
   },
 });

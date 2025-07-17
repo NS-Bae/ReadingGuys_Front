@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { moderateScale } from 'react-native-size-matters';
 
 import { StackParamList } from '../types.tsx';
 import Styles from '../mainStyle.tsx';
@@ -65,16 +66,7 @@ const exclusiveStyles = StyleSheet.create({
 
   },
   normal: {
-    fontSize: 27,
-    textAlign: 'left',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    color: 'black',
-    margin: 0,
-    padding: 0,
-  },
-  small: {
-    fontSize: 15,
+    fontSize: moderateScale(30),
     textAlign: 'left',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -83,7 +75,7 @@ const exclusiveStyles = StyleSheet.create({
     padding: 0,
   },
   infotext: {
-    fontSize: 15,
+    fontSize: moderateScale(20),
     color: 'black',
     paddingTop: 5,
   },

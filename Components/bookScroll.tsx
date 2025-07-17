@@ -1,45 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
-import RNFS from 'react-native-fs';
+
+import { BookData, UserInfo, Records } from '../types.tsx';
+
+import { getDownloadedBooks, syncDownloadedBooks } from '../utils/userAsyncStorageFunction.tsx';
+import { downloadWorkbookFile } from '../utils/handleWorkbookFile.tsx';
+import { loadExamRecord } from '../utils/examFunction.tsx';
 
 import BookButton from './changedButton';
 import Mt from './text.tsx';
 import Styles from '../mainStyle.tsx';
 import Bs from '../Components/bottomSheet.tsx';
-import api from '../api.tsx';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AxiosError } from 'axios';
-
-interface Book {
-  workbookId: string;
-  workbookName: string;
-  Difficulty: string;
-  storageLink: string;
-}
-interface UserInfo {
-  AcademyID: string;
-  id: string;
-  ok: string;
-  userName: string;
-  UserType: string;
-}
-interface RefineData {
-  userId: string;
-  userName: string;
-  academyId: string;
-  workbookId: string;
-}
-interface Records {
-  ExamDate: string;
-  ProgressRate: string;
-  RecordLink: string;
-  WorkbookName: string;
-  examDate: string;
-}
 
 interface BookScrollProps {
-  books: Book[];
-  onSelectCheckBookButton: (bookId: string, recordList: Records[], recordCount: number) => void;
+  books: BookData[]; //서버에 존재하는 서적
+  onSelectCheckBookButton: (bookId: BookData, recordList: Records[], recordCount: number) => void;
   userInfo: UserInfo;
   movePage: (value: string) => void;
 }
@@ -50,134 +25,87 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
 
   const [openUpIndex, setOpenUpIndex] = useState<string | null>(null);
   const [openMdIndex, setOpenMdIndex] = useState<string | null>(null);
-  const [upIsDownloaded, setUpIsDownloaded] = useState<{ [key: string]: boolean }>({});
-  const [sK, setSK] = useState<Book | null>(null);
+  const [sK, setSK] = useState<BookData | null>(null);
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const [existBookList, setExistBookList] = useState<string[][]>([]);//저장된 책들
-  const [recordList, setRecordList] = useState<any>(null);
+  const [existBookList, setExistBookList] = useState<BookData[]>();//저장된 책들
+  const [recordList, setRecordList] = useState<Records[]>([]);
   const [recordCount, setRecordCount] = useState<number>(0);
   const [latestPoint, setLatestPoint] = useState<string>('0');
 
-  //문제집 다운로드 버튼(downFile함수호출)
-  const handleBBUToggle = (workbookId: string, workbookName: string, storageLink: string) => {
-    if (workbookName && storageLink)
+  //문제집 관리 괸련 함수
+  const fetchDownloadedBooks = async () => {
+    try
     {
-      downFile(workbookId, storageLink, workbookName);
+      const downBookList = await getDownloadedBooks();
+      setExistBookList(downBookList);
+    }
+    catch(error)
+    {
+      console.error('다운로드된 책 목록을 가져오는 중 오류 발생:', error);
+    }
+  };
+
+  const handleServerBook = async (book: BookData) => {
+    if (book)
+    {
+      const localPath = await downloadWorkbookFile(book);
+      if(localPath)
+      {
+        Alert.alert('다운로드 완료', `${book.workbookName} 이(가) 저장되었습니다.`);
+      }
+      else
+      {
+        Alert.alert('다운로드 실패', '파일 저장에 실패했습니다.');
+      }
     }
     else
     {
       Alert.alert('문제집 정보가 올바르지 않아 다운로드에 실패했습니다.');
     }
+    fetchDownloadedBooks();
   };
-  //다운로드 된 문제집의 상세정보 확인
-  const handleBBMToggle = async (bookId: string) => {
-    const savedBooks = await AsyncStorage.getItem('downloadedBooks');
+  const handleDownloadedBook = async (book: BookData) => {
     setLatestPoint('0');
-    if(savedBooks)
+    if(existBookList)
     {
-      const parsedBooks = JSON.parse(savedBooks);
-      const nowBookInfo = parsedBooks.find((book: Book) => book.workbookId.toString() === bookId);
-      if (nowBookInfo)
+      const nowBookInfo = existBookList.find((bookss: BookData) => bookss.workbookId === book.workbookId);
+      console.log(nowBookInfo, 'pqpqpqp');
+      if(nowBookInfo !== undefined)
       {
         setSK(nowBookInfo);
+
         const refineData = {
           userId: userInfo.id,
           userName: userInfo.userName,
           academyId: userInfo.AcademyID,
           workbookId: nowBookInfo.workbookId,
         };
-        const RecordList: Records[] = await getWorkbookExamRecord(refineData);
-        const latestRecord: string = await extractLatestRecord(RecordList);
-        setLatestPoint(latestRecord);
-        setOpenMdIndex(openMdIndex === bookId ? null : bookId);
-        onSelectCheckBookButton(nowBookInfo, RecordList, RecordList.length);
-        handleOpenBottomSheet();
-      }
-      else
-      {
-        console.log('책 정보를 찾을 수 없습니다.');
+        const RecordList = await loadExamRecord(refineData);
+        if(RecordList !== null && RecordList !== undefined)
+        {
+          setRecordCount(RecordList.length);
+          setRecordList(RecordList);
+          const latestRecord: string = await extractLatestRecord(RecordList);
+
+          setLatestPoint(latestRecord);
+          setOpenMdIndex(openMdIndex === book.workbookId ? null : book.workbookId);
+          onSelectCheckBookButton(nowBookInfo, RecordList, RecordList.length);
+          handleOpenBottomSheet();
+        }
       }
     }
+
     if (openUpIndex !== null)
     {
       setOpenUpIndex(null);
     }
-    if (openMdIndex === bookId)
+    if (openMdIndex === book.workbookId)
     {
       handleCloseBottomSheet();
     }
   };
-  //새로 업로드된 문제집 다운로드
-  const downFile = async (workbookId: string, storageLink: string, workbookName: string) => {
-    try {
-      const response = await api.post('/workbook/download', { storageLink }, { responseType: 'blob' });
-      const reader = new FileReader();
-      reader.readAsDataURL(response.data);
-      reader.onloadend = async () => {
-        if (typeof reader.result === 'string')
-        {
-          const convertData = reader.result.split(',')[1];
-          const localPath = `${RNFS.DocumentDirectoryPath}/${workbookId}_${workbookName}.zip`;
-          await RNFS.writeFile(localPath, convertData, 'base64');
-          setUpIsDownloaded((prevState) => ({ ...prevState, [workbookName]: true }));
-          Alert.alert('다운로드 완료');
-          //다운이후 저장된 파일상태 갱신
-          await checkFileStat();
 
-          //다운이후 다운된 책정보 AsyncStorage저장
-          const bookToDownload = books.find(book => book.workbookId === workbookId);
-          if (!bookToDownload)
-          {
-            Alert.alert('책을 찾을 수 없습니다', '해당 책이 목록에 없습니다.');
-            return;
-          }
-          bookToDownload.storageLink = localPath;
-
-          // 새로 다운로드한 책 정보 추가
-          const savedBooks = await AsyncStorage.getItem('downloadedBooks');
-          const booksInStorage = savedBooks ? JSON.parse(savedBooks) : [];
-
-          const isDuplicate = booksInStorage.some(
-            (book: Book) => book.workbookId === bookToDownload.workbookId && book.workbookName === bookToDownload.workbookName
-          );
-
-          if (isDuplicate) {
-            console.log('이미 다운로드된 책입니다.');
-            return;
-          }
-          const updatedBooks = [...booksInStorage, bookToDownload];
-          await AsyncStorage.setItem('downloadedBooks', JSON.stringify(updatedBooks));
-        }
-        else
-        {
-          Alert.alert('파일 처리 오류', '파일을 변환하는 중 오류가 발생했습니다.');
-        }
-      };
-    }
-    catch (error)
-    {
-      Alert.alert('다운로드 실패', '서버에서 오류가 발생했습니다.');
-    }
-  };
-  //다운로드된 문제집목록 확인
-  const checkFileStat = async () => {
-    try
-    {
-      const path = RNFS.DocumentDirectoryPath;
-      const files = await RNFS.readDir(path);
-
-      const afterProcessedZipFiles = files
-        .filter((file) => file.isFile() && file.name.endsWith('.zip'))
-        .map((file) => file.name.replace('.zip', '').split('_'));
-
-      setExistBookList(afterProcessedZipFiles);
-    }
-    catch (error)
-    {
-      console.error('파일이 존재하지 않습니다:', error);
-    }
-  };
-  //일반 스마트폰의 문제집 상세정보 확인
+  //일반 스마트폰의 문제집 상세정보 확인 BottomSheetModal
   const handleOpenBottomSheet = () => {
     setBottomSheetVisible(true);
   };
@@ -192,6 +120,8 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
       setOpenMdIndex(null);
     }
   };
+
+  //시험기록 확인 관련 함수
   //가장 최근에 본 시험점수 추출
   async function extractLatestRecord(RecordList: Records[])
   {
@@ -208,41 +138,24 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
       return latestItem.ProgressRate;
     }
   }
-  //내 시험기록중 특정 문제집을 가져오기
-  async function getWorkbookExamRecord(refineData: RefineData)
-  {
-    try
-    {
-      const response = await api.post('/records/oneonerecord',{refineData});
-      if(response)
-      {
-        setRecordList(response.data);
-        setRecordCount(response.data.length);
-        return response.data;
-      }
-      else
-      {
-        console.log(response, '실패');
-      }
-    }
-    catch(error)
-    {
-      const axiosError = error as AxiosError;
-      console.log(axiosError);
-    }
-  }
+  //async storage에 저장된 다운로드 된 책 리스트 가져오기
+  useEffect(() => {
+    fetchDownloadedBooks();
+    syncDownloadedBooks();
+  }, [books]);
 
   const filteredDownBooks = useMemo(() => {
-    if (!books || books.length === 0)
-    {
-      return [];
-    }
-    return books.filter((book) => !existBookList.some((existBook) => existBook[0] === book.workbookId.toString()));
-  }, [books, existBookList]);
+    if (!books || !existBookList) { return []; }
 
-  useEffect(() => {
-    checkFileStat();
-  }, []);
+    return books.filter(
+      (book) =>
+        !existBookList.some(
+          (dlBook) =>
+            dlBook.workbookId === book.workbookId &&
+            dlBook.workbookName === book.workbookName
+        )
+    );
+  }, [books, existBookList]);
 
   return (
     <>
@@ -258,11 +171,11 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
           <View style={styles.manyBtnContainer}>
             {filteredDownBooks && filteredDownBooks.length > 0 ? (
               filteredDownBooks.map((book) => (
-                !upIsDownloaded[book.workbookName] && (
+                (
                   <View key={book.workbookId} style={styles.bTContainer}>
                     <BookButton
                       isOpen={openUpIndex === book.workbookId}
-                      onPress={() => handleBBUToggle(book.workbookId, book.workbookName, book.storageLink)}
+                      onPress={() => handleServerBook(book)}
                       screenWidth={width}
                     />
                     <Mt title={book.workbookName} titleStyle={styles.small} />
@@ -279,13 +192,13 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
           <View style={styles.manyBtnContainer}>
             {existBookList && existBookList.length > 0 ? (
               existBookList.map((book) => (
-                <View key={book[0]} style={styles.bTContainer}>
+                <View key={book.workbookId} style={styles.bTContainer}>
                   <BookButton
-                    isOpen={openUpIndex === book[0]}
-                    onPress={() => handleBBMToggle(book[0])}
+                    isOpen={openUpIndex === book.workbookId}
+                    onPress={() => handleDownloadedBook(book)}
                     screenWidth={width}
                   />
-                  <Mt title={book[1]} titleStyle={styles.small} />
+                  <Mt title={book.workbookName} titleStyle={styles.small} />
                 </View>
               ))
             ) : (
@@ -296,13 +209,13 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
       </ScrollView>
       {isBottomSheetVisible && width < 600 &&
         <Bs
-        sK={sK}
-        isVisible={isBottomSheetVisible}
-        onClose={handleCloseBottomSheet}
-        recordList={recordList}
-        recordCount={recordCount}
-        latestPoint={latestPoint}
-        movePage={movePage}
+          sK={sK}
+          isVisible={isBottomSheetVisible}
+          onClose={handleCloseBottomSheet}
+          recordList={recordList}
+          recordCount={recordCount}
+          latestPoint={latestPoint}
+          movePage={movePage}
         />}
     </>
   );
