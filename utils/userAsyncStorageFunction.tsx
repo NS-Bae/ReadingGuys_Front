@@ -82,7 +82,6 @@ export const getDownloadedBooks = async (): Promise<BookData[]> => {
     if(rawDownloadedBookList !== null)
     {
       const parsedDownloadedBookList = JSON.parse(rawDownloadedBookList);
-      console.log('qqqqq', parsedDownloadedBookList);
       return parsedDownloadedBookList;
     }
     else

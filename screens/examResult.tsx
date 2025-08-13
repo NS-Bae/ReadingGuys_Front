@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BackHandler, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { moderateScale } from 'react-native-size-matters';
 
-import { StackParamList } from '../types';
+import { StackParamList, UserInfo } from '../types';
 
 import { getUserInfo } from '../utils/userAsyncStorageFunction';
+import { saveExamResult } from '../utils/examFunction';
 
 type ExamResultScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Result'>;
 type ExamResultScreenRouteProp = RouteProp<StackParamList, 'Result'>;
@@ -17,6 +18,7 @@ interface ExamResultScreenProps
 
 function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Element
 {
+  const [nowInfo, setNowInfo] = useState<UserInfo>();
   const route = useRoute<ExamResultScreenRouteProp>();
   const { ExamResult, ExamBook, fileNames } = route.params;
   //기본 뒤로가기 커스텀
@@ -33,13 +35,20 @@ function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Elem
 
     return () => subscription.remove();
   }, [navigation]);
+
   useEffect(() => {
     const fetchInfo = async () => {
       const info = await getUserInfo();
-      //여기에 시험결과 저장 함수 추가
+      setNowInfo(info);
     };
     fetchInfo();
   }, []);
+  useEffect(() => {
+    if(nowInfo && ExamResult)
+    {
+      saveExamResult(nowInfo, ExamResult, correctCount, ExamBook);
+    }
+  });
 
   const sortedResult = [...ExamResult].sort(
     (a, b) => a.questionNumber - b.questionNumber
@@ -48,6 +57,7 @@ function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Elem
   const totalCount = ExamResult.length;
 
   const toggleGoBack = () => {
+    console.log('Exam result', ExamResult, nowInfo);
     navigation.navigate('Main');
   };
 

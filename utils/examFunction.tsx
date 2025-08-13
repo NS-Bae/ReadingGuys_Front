@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records } from '../types.tsx';
+import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records, UserInfo, BookData } from '../types.tsx';
 
 import api from '../api.tsx';
 import { AxiosError } from 'axios';
@@ -41,23 +40,26 @@ export const MarkingWorkbook = (userAnswer: UserAnswer[], correctAnswer: Correct
   });
 };
 //시험기록 저장
-export const saveExamResult = async (userId: string, examResult: any): Promise<string> => {
+export const saveExamResult = async (userInfo: UserInfo, examResult: AnswerMarkingResult[], correctCount: number, ExamBook: BookData) => {
+  const aId = userInfo.AcademyID;
+  const uId = userInfo.id;
+  const resultData = {
+    academy: aId,
+    user: uId,
+    workbook: ExamBook.workbookId,
+    correctCount,
+    submitDate: new Date().toISOString(),
+    answer: examResult,
+  };
+  console.log('FUNCTION', resultData);
   try
   {
-    const timestamp = new Date().toISOString();
-    const dataToSave = {
-      userId,
-      timestamp,
-      result: examResult,
-    };
-    await AsyncStorage.setItem(`exam_result_${userId}_${timestamp}`, JSON.stringify(dataToSave));
-    console.log('✅ 로컬 저장 완료');
-    return '✅ 로컬 저장 완료';
+    await api.post('/records/createrecord', resultData);
   }
-  catch (error)
+  catch(error)
   {
-    console.error('❌ 로컬 저장 실패:', error);
-    return '❌ 로컬 저장 실패';
+    const axiosError = error as AxiosError;
+    console.log(axiosError, 'iii');
   }
 };
 //책마다 회원개인의 시험기록 가져오기
