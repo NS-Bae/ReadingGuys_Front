@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { moderateScale } from 'react-native-size-matters';
@@ -8,6 +8,7 @@ import Styles from '../mainStyle.tsx';
 import RecordItem from '../Components/recordItem.tsx';
 import Mt from '../Components/text.tsx';
 import RM from '../Components/recordModal.tsx';
+import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
 
 type RecordScreenRouteProp = RouteProp<StackParamList, 'Record'>;
 
@@ -18,8 +19,39 @@ function CheckRecordScreen()
   const route = useRoute<RecordScreenRouteProp>();
   const { RecordList } = route.params;
 
+  const [userInfo, setUserInfo] = useState<any>(null);
   const [recordURL, setRecordURL] = useState<string>('');
   const [recordModalVisible, setRecordModalVisible] = useState(false);
+
+  const fetchUserInfo = async () => {
+    try
+    {
+      const storedUserInfo = await getUserInfo();
+
+      if (storedUserInfo)
+      {
+        if (storedUserInfo && storedUserInfo.AcademyID)
+        {
+          setUserInfo(storedUserInfo);
+        }
+        else
+        {
+          console.warn('academyId가 없습니다.');
+        }
+      }
+      else
+      {
+        console.warn('userInfo가 AsyncStorage에 없습니다.');
+      }
+    }
+    catch (error)
+    {
+      console.error('사용자 정보를 가져오는데 실패했습니다:', error);
+    }
+  };
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   //시험기록 상세보기 모달창(미완)
   const recordDetail = (recordLink: string) => {
@@ -57,6 +89,7 @@ function CheckRecordScreen()
           isModalVisible={recordModalVisible}
           onClose={() => setRecordModalVisible(false)}
           recordLink={recordURL}
+          userInfo={userInfo}
         />
       }
     </ScrollView>

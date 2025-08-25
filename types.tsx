@@ -46,7 +46,7 @@ export type AnswerMarkingResult = {
   isCorrect: boolean;
   userAnswer: string;
   correctAnswer: string;
-};
+}
 export type StackParamList = {
   Main: any;
   Login: undefined;
@@ -54,4 +54,9 @@ export type StackParamList = {
   Record: { RecordList: Records[] };
   Exam: { ExamBook: BookData };
   Result: { ExamResult: AnswerMarkingResult[], ExamBook: BookData, fileNames: string[] };
-};
+}
+export type ReadFileParams = {
+  uid: string;
+  aid: string;
+  recordLink: string;
+}

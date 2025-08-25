@@ -57,7 +57,6 @@ function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Elem
   const totalCount = ExamResult.length;
 
   const toggleGoBack = () => {
-    console.log('Exam result', ExamResult, nowInfo);
     navigation.navigate('Main');
   };
 

@@ -1,4 +1,4 @@
-import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records, UserInfo, BookData } from '../types.tsx';
+import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records, UserInfo, BookData, ReadFileParams } from '../types.tsx';
 
 import api from '../api.tsx';
 import { AxiosError } from 'axios';
@@ -75,6 +75,24 @@ export const loadExamRecord = async (refineData: RefineData): Promise<Records[] 
   {
     const axiosError = error as AxiosError;
     console.log(axiosError, 'iii');
+
+    return null;
+  }
+};
+
+//시험기록 json파일 읽기
+export const readExamRecord = async (readFileParams: ReadFileParams): Promise<any | null> => {
+  try
+  {
+    const response = await api.post('/records/readFile', {readFileParams})
+
+    const data = await response.data;
+
+    return data;
+  }
+  catch(error)
+  {
+    console.error('Error fetching result: ', error);
 
     return null;
   }

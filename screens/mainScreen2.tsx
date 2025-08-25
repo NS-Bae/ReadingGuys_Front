@@ -157,6 +157,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
           isModalVisible={recordModalVisible}
           onClose={() => setRecordModalVisible(false)}
           recordLink={recordURL}
+          userInfo={userInfo}
         />
       }
     </>
