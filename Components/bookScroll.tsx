@@ -64,6 +64,7 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
     }
     fetchDownloadedBooks();
   };
+
   const handleDownloadedBook = async (book: BookData) => {
     setLatestPoint('0');
     if(existBookList)

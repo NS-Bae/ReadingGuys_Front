@@ -12,6 +12,7 @@ import Styles from '../mainStyle.tsx';
 import BookScroll from '../Components/bookScroll.tsx';
 import BookInfo from '../Components/bookinfo.tsx';
 import api from '../api.tsx';
+import RM from '../Components/recordModal.tsx';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
 
@@ -32,6 +33,9 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   const [bookInfo, setBookInfo] = useState<any>(null);
   const [recordList, setRecordList] = useState<any>(null);
   const [recordCount, setRecordCount] = useState<number>(0);
+
+  const [recordURL, setRecordURL] = useState<string>('');
+  const [recordModalVisible, setRecordModalVisible] = useState(false);
 
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
@@ -104,6 +108,8 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   };
   //시험기록 상세보기 모달창(미완)
   const recordDetail = (recordLink: string) => {
+    setRecordURL(recordLink);
+    setRecordModalVisible(true);
     console.log(recordLink);
   };
   //사용자정보 가져오기
@@ -115,36 +121,45 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   }, [getBookList, userInfo]);
 
   return (
-    <SafeAreaView style={styles.basic}>
-      <View style={styles.basic}>
-        {width > 600 ? ( //분할화면
-          <View style={styles.splitScreen}>
-            <BookScroll
-              books = {bookList}
-              onSelectCheckBookButton = {selectCheck}
-              userInfo = {userInfo}
-              movePage={movePage}
-            />
-            <BookInfo
-              books = {bookInfo}
-              recordList = {recordList}
-              recordCount = {recordCount}
-              movePage={movePage}
-              recordDetail={recordDetail}
-            />
-          </View>
-        ) : ( //전체화면
-          <View style={styles.basic}>
-            <BookScroll
-              books = {bookList}
-              onSelectCheckBookButton = {selectCheck}
-              userInfo = {userInfo}
-              movePage = {movePage}
-            />
-          </View>
-        )}
-      </View>
-    </SafeAreaView>
+    <>
+      <SafeAreaView style={styles.basic}>
+        <View style={styles.basic}>
+          {width > 600 ? ( //분할화면
+            <View style={styles.splitScreen}>
+              <BookScroll
+                books = {bookList}
+                onSelectCheckBookButton = {selectCheck}
+                userInfo = {userInfo}
+                movePage={movePage}
+              />
+              <BookInfo
+                books = {bookInfo}
+                recordList = {recordList}
+                recordCount = {recordCount}
+                movePage={movePage}
+                recordDetail={recordDetail}
+              />
+            </View>
+          ) : ( //전체화면
+            <View style={styles.basic}>
+              <BookScroll
+                books = {bookList}
+                onSelectCheckBookButton = {selectCheck}
+                userInfo = {userInfo}
+                movePage = {movePage}
+              />
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
+      {width > 600 && recordModalVisible &&
+        <RM
+          isModalVisible={recordModalVisible}
+          onClose={() => setRecordModalVisible(false)}
+          recordLink={recordURL}
+        />
+      }
+    </>
   );
 }
 

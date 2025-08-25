@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { moderateScale } from 'react-native-size-matters';
@@ -7,6 +7,7 @@ import { StackParamList } from '../types.tsx';
 import Styles from '../mainStyle.tsx';
 import RecordItem from '../Components/recordItem.tsx';
 import Mt from '../Components/text.tsx';
+import RM from '../Components/recordModal.tsx';
 
 type RecordScreenRouteProp = RouteProp<StackParamList, 'Record'>;
 
@@ -17,8 +18,13 @@ function CheckRecordScreen()
   const route = useRoute<RecordScreenRouteProp>();
   const { RecordList } = route.params;
 
+  const [recordURL, setRecordURL] = useState<string>('');
+  const [recordModalVisible, setRecordModalVisible] = useState(false);
+
   //시험기록 상세보기 모달창(미완)
   const recordDetail = (recordLink: string) => {
+    setRecordURL(recordLink);
+    setRecordModalVisible(true);
     console.log(recordLink);
   };
 
@@ -46,6 +52,13 @@ function CheckRecordScreen()
         <Text style={exclusiveStyles.infotext}>데이터가 없습니다.</Text>
       )}
       </View>
+      {width < 600 && recordModalVisible &&
+        <RM
+          isModalVisible={recordModalVisible}
+          onClose={() => setRecordModalVisible(false)}
+          recordLink={recordURL}
+        />
+      }
     </ScrollView>
   );
 }
