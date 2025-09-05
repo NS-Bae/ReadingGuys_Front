@@ -195,7 +195,7 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
               existBookList.map((book) => (
                 <View key={book.workbookId} style={styles.bTContainer}>
                   <BookButton
-                    isOpen={openUpIndex === book.workbookId}
+                    isOpen={openMdIndex === book.workbookId}
                     onPress={() => handleDownloadedBook(book)}
                     screenWidth={width}
                   />

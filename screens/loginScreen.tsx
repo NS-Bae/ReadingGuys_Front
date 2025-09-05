@@ -48,7 +48,6 @@ function LoginScreen({ navigation } : LoginScreenProps): React.JSX.Element {
         const response = await api.post('/auth/login', inputs);
         if(response.status === 201 )
         {
-          console.log(inputs, '성공');
           setSsa(true);
           const token = response.data.accessToken;
           const userInfo = response.data.userInfo;

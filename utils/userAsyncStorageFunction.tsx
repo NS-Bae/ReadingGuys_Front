@@ -1,18 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import RNFS from 'react-native-fs';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import * as Keychain from 'react-native-keychain';
 
 import { BookData } from '../types';
 
 export const getUserInfo = async () => {
   try
   {
-    const rawUserInfo = await AsyncStorage.getItem('userInfo');
+    const rawUserInfo = await EncryptedStorage.getItem('userInfo');
     if(rawUserInfo !== null)
     {
       const parsedUserInfo = JSON.parse(rawUserInfo);
 
-      return parsedUserInfo;
+      return parsedUserInfo.info;
     }
     else
     {
@@ -22,7 +24,7 @@ export const getUserInfo = async () => {
   }
   catch (error)
   {
-    console.error('❌ AsyncStorage 값을 가져오는 중 오류 발생:', error);
+    console.error('❌ EncryptedStorage 값을 가져오는 중 오류 발생:', error);
     return null;
   }
 };
@@ -30,7 +32,8 @@ export const getUserInfo = async () => {
 export const clearAuthStorage = async () => {
   try
   {
-    await AsyncStorage.multiRemove(['userToken', 'userInfo']);
+    await Keychain.resetGenericPassword();
+    await EncryptedStorage.removeItem('userInfo');
     console.log('🧹 userToken과 userInfo 삭제 완료');
   }
   catch(error)
@@ -39,17 +42,18 @@ export const clearAuthStorage = async () => {
   }
 };
 
-export const verifyAndHandleToken = async () => {
+export const verifyAndHandleToken = async (): Promise<boolean> => {
   try
   {
-    const rawUserToken = await AsyncStorage.getItem('userToken');
+    const rawUserToken = await Keychain.getGenericPassword();
     if(!rawUserToken)
     {
       console.warn('❗️토큰이 존재하지 않음');
       await clearAuthStorage();
       return false;
     }
-    const decoded: any = jwtDecode(rawUserToken);
+    const token = rawUserToken.password;
+    const decoded: any = jwtDecode(token);
     const currentTime = Math.floor(Date.now() / 1000);
 
     if(decoded.exp < currentTime)
@@ -70,8 +74,18 @@ export const verifyAndHandleToken = async () => {
 };
 
 export const registTokenAndInfo = async(token: string, info: string) => {
-  await AsyncStorage.setItem('userToken', token);
-  await AsyncStorage.setItem('userInfo', JSON.stringify(info));
+
+  console.log('q', token, info);
+
+  await Keychain.setGenericPassword('jwt', token);
+
+  // 사용자 정보는 EncryptedStorage에 저장
+  await EncryptedStorage.setItem(
+    'userInfo',
+    JSON.stringify({
+      info,
+    })
+  );
 };
 
 export const getDownloadedBooks = async (): Promise<BookData[]> => {
