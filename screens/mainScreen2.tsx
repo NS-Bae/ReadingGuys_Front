@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Records, StackParamList, UserInfo } from '../types.tsx';
 import { AxiosError } from 'axios';
+import SideDrawer from 'react-native-side-drawer';
 
 import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
 
@@ -13,6 +14,8 @@ import BookScroll from '../Components/bookScroll.tsx';
 import BookInfo from '../Components/bookinfo.tsx';
 import api from '../api.tsx';
 import RM from '../Components/recordModal.tsx';
+import DrawerContent from '../Components/infoSideBarComponent.tsx';
+import { moderateScale } from 'react-native-size-matters';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
 
@@ -29,10 +32,11 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
 
   const [recordURL, setRecordURL] = useState<string>('');
   const [recordModalVisible, setRecordModalVisible] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
-
+  //서버에 등록된 허용된 책리스트 불러오기
   const getBookList = useCallback(async () => {
     if (!userInfo) { return null; }
     try
@@ -55,7 +59,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
       console.log('b',axiosError);
     }
   }, [userInfo]);
-  //
+  //사용자 정보 가져오기
   const fetchUserInfo = async () => {
     try
     {
@@ -102,11 +106,17 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
       }
     }
   };
-  //시험기록 상세보기 모달창(미완)
+  //시험기록 상세보기 모달창
   const recordDetail = (recordLink: string) => {
     setRecordURL(recordLink);
     setRecordModalVisible(true);
-    console.log(recordLink);
+  };
+  //햄버거 서랍
+  const toggleOpenDrawer = () => {
+    setIsOpen(!isOpen);
+  };
+  const toggleCloseDrawer = () => {
+    setIsOpen(!isOpen);
   };
   //사용자정보 가져오기
   useEffect(() => {
@@ -119,7 +129,23 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   return (
     <>
       <SafeAreaView style={styles.basic}>
+      {isOpen && (
+        <View>
+          <SideDrawer
+            open={isOpen}
+            drawerContent={<DrawerContent toggleCloseDrawer={toggleCloseDrawer}/>}
+            drawerPercentage={35}
+            animationTime={500}
+            overlay={true}
+          />
+        </View>
+      )}
         <View style={styles.basic}>
+            <View style={exclusiveStyles.container}>
+            <TouchableOpacity style={exclusiveStyles.burgerButton} onPress={toggleOpenDrawer}>
+              <Text style={exclusiveStyles.buergerButtonText}>☰</Text>
+            </TouchableOpacity>
+          </View>
           {width > 600 ? ( //분할화면
             <View style={styles.splitScreen}>
               { userInfo && bookList &&
@@ -167,3 +193,22 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
 }
 
 export default Ms;
+
+const exclusiveStyles = StyleSheet.create({
+  container: {
+    justifyContent: 'flex-start',
+    paddingLeft: 20,
+    paddingTop: 10,
+  },
+  burgerButton: {
+    alignItems: 'center',
+    width: 40,
+    borderRadius: 5,
+  },
+  buergerButtonText: {
+    color: 'black',
+    fontSize: moderateScale(20),
+    fontWeight: 'bold',
+    width: 'auto',
+  },
+});
