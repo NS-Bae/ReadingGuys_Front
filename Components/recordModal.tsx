@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import Modal from 'react-native-modal';
+import { moderateScale } from 'react-native-size-matters';
 
 import { ReadFileParams, UserInfo } from '../types';
 import { readExamRecord } from '../utils/examFunction';
@@ -14,6 +15,7 @@ interface RecordModalComponentProps
 }
 
 const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, recordLink, onClose, userInfo }) => {
+  const [answerData, setAnswerData] = useState<any>(null);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,21 +28,24 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
 
   const uid = userInfo.id;
   const aid = userInfo.AcademyID;
-  const formData: ReadFileParams = {
+
+  useEffect(() => {
+    const formData: ReadFileParams = {
       uid,
       aid,
       recordLink,
     };
-  useEffect(() => {
+
     const fetchData = async () => {
       try
       {
         const response = await readExamRecord( formData );
         setData(response);
+        setAnswerData(response.answer);
       }
       catch(error)
       {
-        console.error(error);
+        console.error('aaa', error);
       }
       finally
       {
@@ -48,7 +53,7 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
       }
     };
     fetchData();
-  });
+  }, [aid, uid, recordLink]);
 
   if(loading)
   {
@@ -93,7 +98,7 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
       </Modal>
     );
   }
-
+  console.log(answerData);
   return (
     <Modal
       isVisible={isModalVisible}
@@ -107,8 +112,20 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
           <Text style={styles.closeButtonText}>닫기</Text>
         </TouchableOpacity>
         <View style={styles.infoArea}>
-          <Text>Hello! This is a Modal</Text>
-        </View>
+          <FlatList
+            data={answerData}
+            keyExtractor={(item) => item.questionNumber.toString()}
+            renderItem={({ item }) => (
+              <View style={[styles.infoTitileZone, item.isCorrect ? styles.correct : styles.incorrect]}>
+                <Text style={styles.infoTitileText}>{item.question}</Text>
+                <View style={styles.infoZone}>
+                  <Text style={styles.infoText}>{item.isCorrect ? '⭕ 정답' : '❌ 오답'}</Text>
+                  <Text style={styles.infoText}>{item.userAnswer || '미제출'}</Text>
+                </View>
+              </View>
+            )}
+          />
+      </View>
       </View>
     </Modal>
   );
@@ -129,7 +146,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   infoArea: {
-    backgroundColor: 'red',
+    flex: 1,
+    width: '96%',
+    marginTop: moderateScale(25),
   },
   closeButton: {
     position: 'absolute',
@@ -138,7 +157,33 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   closeButtonText: {
-    fontSize: 18,
+    fontSize: moderateScale(15),
     color: 'black',
+  },
+  infoTitileZone: {
+    flex: 1,
+    width: '100%',
+    marginVertical: 10,
+  },
+  correct: {
+    backgroundColor: '#d4edda',
+  },
+  incorrect: {
+    backgroundColor: '#f8d7da',
+  },
+  infoTitileText:
+  {
+    fontSize: moderateScale(23),
+    textAlign: 'center',
+    fontWeight: 700,
+  },
+  infoZone: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  infoText: {
+    fontSize: moderateScale(20),
   },
 });

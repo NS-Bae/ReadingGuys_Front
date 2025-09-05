@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-n
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { moderateScale } from 'react-native-size-matters';
 
-import { StackParamList } from '../types.tsx';
+import { StackParamList, UserInfo } from '../types.tsx';
 import Styles from '../mainStyle.tsx';
 import RecordItem from '../Components/recordItem.tsx';
 import Mt from '../Components/text.tsx';
@@ -17,9 +17,9 @@ function CheckRecordScreen()
   const { width } = useWindowDimensions();
   const styles = Styles(width);
   const route = useRoute<RecordScreenRouteProp>();
-  const { RecordList } = route.params;
+  const { RecordList, bookInfo } = route.params;
 
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo>();
   const [recordURL, setRecordURL] = useState<string>('');
   const [recordModalVisible, setRecordModalVisible] = useState(false);
 
@@ -67,7 +67,7 @@ function CheckRecordScreen()
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.tfContainer}>
-        <Mt title="내 시험 기록" titleStyle={styles.normal} />
+        <Mt title={`내 ${bookInfo.workbookName} 시험 기록`} titleStyle={styles.normal} />
       </View>
       <View style={exclusiveStyles.basic} >
       {RecordList.length > 0 ? (
@@ -84,7 +84,7 @@ function CheckRecordScreen()
         <Text style={exclusiveStyles.infotext}>데이터가 없습니다.</Text>
       )}
       </View>
-      {width < 600 && recordModalVisible &&
+      {width < 600 && recordModalVisible && userInfo &&
         <RM
           isModalVisible={recordModalVisible}
           onClose={() => setRecordModalVisible(false)}

@@ -4,7 +4,7 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { moderateScale } from 'react-native-size-matters';
 
-import { StackParamList, UserInfo } from '../types';
+import { SaveRecordResult, StackParamList, UserInfo } from '../types';
 
 import { getUserInfo } from '../utils/userAsyncStorageFunction';
 import { saveExamResult } from '../utils/examFunction';
@@ -46,7 +46,11 @@ function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Elem
   useEffect(() => {
     if(nowInfo && ExamResult)
     {
-      saveExamResult(nowInfo, ExamResult, correctCount, ExamBook);
+      const updatedExamResult: SaveRecordResult[] = ExamResult.map(item => ({
+        ...item,
+        question: fileNames[item.questionNumber],
+      }));
+      saveExamResult(nowInfo, updatedExamResult, correctCount, ExamBook);
     }
   });
 

@@ -1,4 +1,4 @@
-import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records, UserInfo, BookData, ReadFileParams } from '../types.tsx';
+import { UserAnswer, CorrectAnswer, AnswerMarkingResult, RefineData, Records, UserInfo, BookData, ReadFileParams, SaveRecordResult } from '../types.tsx';
 
 import api from '../api.tsx';
 import { AxiosError } from 'axios';
@@ -40,7 +40,7 @@ export const MarkingWorkbook = (userAnswer: UserAnswer[], correctAnswer: Correct
   });
 };
 //시험기록 저장
-export const saveExamResult = async (userInfo: UserInfo, examResult: AnswerMarkingResult[], correctCount: number, ExamBook: BookData) => {
+export const saveExamResult = async (userInfo: UserInfo, examResult: SaveRecordResult[], correctCount: number, ExamBook: BookData) => {
   const aId = userInfo.AcademyID;
   const uId = userInfo.id;
   const resultData = {
@@ -51,7 +51,6 @@ export const saveExamResult = async (userInfo: UserInfo, examResult: AnswerMarki
     submitDate: new Date().toISOString(),
     answer: examResult,
   };
-  console.log('FUNCTION', resultData);
   try
   {
     await api.post('/records/createrecord', resultData);
@@ -82,12 +81,12 @@ export const loadExamRecord = async (refineData: RefineData): Promise<Records[] 
 
 //시험기록 json파일 읽기
 export const readExamRecord = async (readFileParams: ReadFileParams): Promise<any | null> => {
+  console.log('a', readFileParams);
   try
   {
-    const response = await api.post('/records/readFile', {readFileParams})
-
+    const response = await api.post('/records/readFile', { readFileParams });
     const data = await response.data;
-
+    console.log('a');
     return data;
   }
   catch(error)

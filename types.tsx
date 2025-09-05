@@ -47,11 +47,15 @@ export type AnswerMarkingResult = {
   userAnswer: string;
   correctAnswer: string;
 }
+export type SaveRecordResult = AnswerMarkingResult &
+{
+  question: string;
+}
 export type StackParamList = {
   Main: any;
   Login: undefined;
   Home: undefined;
-  Record: { RecordList: Records[] };
+  Record: { RecordList: Records[], bookInfo: BookData };
   Exam: { ExamBook: BookData };
   Result: { ExamResult: AnswerMarkingResult[], ExamBook: BookData, fileNames: string[] };
 }

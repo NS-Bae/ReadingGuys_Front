@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StackParamList } from '../types.tsx';
+import { Records, StackParamList, UserInfo } from '../types.tsx';
 import { AxiosError } from 'axios';
 
 import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
@@ -19,19 +19,12 @@ type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'
 interface MainScreenProps {
   navigation: MainScreenNavigationProp;
 }
-interface Records {
-  ExamDate: string;
-  ProgressRate: string;
-  RecordLink: string;
-  WorkbookName: string;
-  examDate: string;
-}
 
 function Ms({ navigation } : MainScreenProps): React.JSX.Element {
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [bookList, setBookList] = useState<any>(null);
-  const [bookInfo, setBookInfo] = useState<any>(null);
-  const [recordList, setRecordList] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo>();
+  const [bookList, setBookList] = useState<BookData[]>();
+  const [bookInfo, setBookInfo] = useState<BookData>();
+  const [recordList, setRecordList] = useState<Records[]>();
   const [recordCount, setRecordCount] = useState<number>(0);
 
   const [recordURL, setRecordURL] = useState<string>('');
@@ -97,13 +90,16 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   };
   //화면이동
   const movePage = (value: string) => {
-    if(value === 'record')
+    if(bookInfo)
     {
-      navigation.navigate('Record', { RecordList: recordList });
-    }
-    else if(value === 'exam')
-    {
-      navigation.navigate('Exam', { ExamBook: bookInfo });
+      if(value === 'record' && recordList)
+      {
+        navigation.navigate('Record', { RecordList: recordList, bookInfo: bookInfo });
+      }
+      else if(value === 'exam')
+      {
+        navigation.navigate('Exam', { ExamBook: bookInfo });
+      }
     }
   };
   //시험기록 상세보기 모달창(미완)
@@ -126,33 +122,39 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
         <View style={styles.basic}>
           {width > 600 ? ( //분할화면
             <View style={styles.splitScreen}>
-              <BookScroll
-                books = {bookList}
-                onSelectCheckBookButton = {selectCheck}
-                userInfo = {userInfo}
-                movePage={movePage}
-              />
-              <BookInfo
-                books = {bookInfo}
-                recordList = {recordList}
-                recordCount = {recordCount}
-                movePage={movePage}
-                recordDetail={recordDetail}
-              />
+              { userInfo && bookList &&
+                <BookScroll
+                  books = {bookList}
+                  onSelectCheckBookButton = {selectCheck}
+                  userInfo = {userInfo}
+                  movePage={movePage}
+                />
+              }
+              { bookInfo && recordList &&
+                <BookInfo
+                  books = {bookInfo}
+                  recordList = {recordList}
+                  recordCount = {recordCount}
+                  movePage={movePage}
+                  recordDetail={recordDetail}
+                />
+              }
             </View>
           ) : ( //전체화면
             <View style={styles.basic}>
-              <BookScroll
-                books = {bookList}
-                onSelectCheckBookButton = {selectCheck}
-                userInfo = {userInfo}
-                movePage = {movePage}
-              />
+              { userInfo && bookList &&
+                <BookScroll
+                  books = {bookList}
+                  onSelectCheckBookButton = {selectCheck}
+                  userInfo = {userInfo}
+                  movePage={movePage}
+                />
+              }
             </View>
           )}
         </View>
       </SafeAreaView>
-      {width > 600 && recordModalVisible &&
+      {width > 600 && recordModalVisible && userInfo &&
         <RM
           isModalVisible={recordModalVisible}
           onClose={() => setRecordModalVisible(false)}
