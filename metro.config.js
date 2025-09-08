@@ -8,4 +8,18 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
  */
 const config = {};
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = (async () => {
+  const defaultConfig = await getDefaultConfig(__dirname);
+
+  return {
+    ...defaultConfig,
+    resolver: {
+      ...defaultConfig.resolver,
+      extraNodeModules: {
+        crypto: require.resolve('react-native-crypto'),
+      },
+      // 필요하다면 sourceExts도 그대로 유지
+      sourceExts: defaultConfig.resolver.sourceExts,
+    },
+  };
+})();

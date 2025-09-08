@@ -118,6 +118,9 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   const toggleCloseDrawer = () => {
     setIsOpen(!isOpen);
   };
+  const toggleDrawerContent = (key: string) => {
+    console.log(key);
+  };
   //사용자정보 가져오기
   useEffect(() => {
     fetchUserInfo();
@@ -133,7 +136,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
         <View>
           <SideDrawer
             open={isOpen}
-            drawerContent={<DrawerContent toggleCloseDrawer={toggleCloseDrawer}/>}
+            drawerContent={<DrawerContent toggleCloseDrawer={toggleCloseDrawer} toggleDrawerContent={toggleDrawerContent}/>}
             drawerPercentage={35}
             animationTime={500}
             overlay={true}

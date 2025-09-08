@@ -4,21 +4,28 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { moderateScale } from 'react-native-size-matters';
 
 interface DrawerContentProps {
-  toggleCloseDrawer?: () => void;
+  toggleCloseDrawer: () => void;
+  toggleDrawerContent: (key: string) => void;
 }
 
-const DrawerContent: React.FC<DrawerContentProps> = ({ toggleCloseDrawer }) => {
+const DrawerContent: React.FC<DrawerContentProps> = ({ toggleCloseDrawer, toggleDrawerContent }) => {
   return (
     <SafeAreaView style={styles.drawerContent}>
       <ScrollView style={styles.topPlace}>
-        <TouchableOpacity key="info" onPress={toggleCloseDrawer} style={styles.closeButton}>
+        <TouchableOpacity key="info" onPress={() => toggleDrawerContent('info')} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>나의 정보</Text>
         </TouchableOpacity>
-        <TouchableOpacity key="credits" onPress={toggleCloseDrawer} style={styles.closeButton}>
+        <TouchableOpacity key="credits" onPress={() => toggleDrawerContent('credits')} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>Credits</Text>
         </TouchableOpacity>
-        <TouchableOpacity key="legal" onPress={toggleCloseDrawer} style={styles.closeButton}>
+        <TouchableOpacity key="legal" onPress={() => toggleDrawerContent('legal')} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>약관</Text>
+        </TouchableOpacity>
+        <TouchableOpacity key="pi" onPress={() => toggleDrawerContent('pi')} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>개인정보 처리방침</Text>
+        </TouchableOpacity>
+        <TouchableOpacity key="about" onPress={() => toggleDrawerContent('about')} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>사업자 정보</Text>
         </TouchableOpacity>
       </ScrollView >
       <TouchableOpacity key="close" onPress={toggleCloseDrawer} style={styles.closeButton}>
