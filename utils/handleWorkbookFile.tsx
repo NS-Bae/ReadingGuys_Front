@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from '../api.tsx';
-import { BookData } from '../types.tsx';
+import { BookData, LocalBookData } from '../types.tsx';
 import { getDownloadedBooks } from './userAsyncStorageFunction.tsx';
 
 /**
@@ -29,9 +29,8 @@ export const downloadedBook = async (book: BookData): Promise<void> => {
 export const downloadWorkbookFile = async ( book: BookData ): Promise<string | null> => {
   try
   {
-    const storageLink = book.storageLink;
-    console.log(storageLink);
-    const response = await api.post('/workbook/download', { storageLink }, { responseType: 'blob' });
+    console.log('gggggggerww', book);
+    const response = await api.post('/workbook/download', book, { responseType: 'blob' });
 
     const reader = new FileReader();
 
@@ -55,7 +54,7 @@ export const downloadWorkbookFile = async ( book: BookData ): Promise<string | n
 
             if(!isDuplicate)
             {
-              const newBook: BookData = {
+              const newBook: LocalBookData = {
                 workbookId: book.workbookId,
                 Difficulty: book.Difficulty,
                 workbookName: book.workbookName,

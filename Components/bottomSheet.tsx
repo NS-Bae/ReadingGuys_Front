@@ -2,23 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 
-interface Book {
-  Difficulty: string;
-  storageLink: string;
-  workbookId: string;
-  workbookName: string;
-}
-interface Records {
-  ExamDate: string;
-  ProgressRate: string;
-  RecordLink: string;
-  WorkbookName: string;
-  examDate: string;
-}
+import { BookData, Records } from '../types';
+
 interface CustomBottomSheetProps {
   isVisible: boolean;
   onClose: () => void;
-  sK: Book | null;
+  sK: BookData | null;
   recordList: Records[];
   recordCount: number;
   latestPoint: string;

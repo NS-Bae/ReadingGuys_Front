@@ -6,21 +6,10 @@ import Styles from '../mainStyle.tsx';
 import Mt from './text.tsx';
 import Accordion from './accordionList.tsx';
 
-interface Book {
-  workbookId: string;
-  workbookName: string;
-  Difficulty: string;
-  storageLink: string;
-}
-interface Records {
-  ExamDate: string;
-  ProgressRate: string;
-  RecordLink: string;
-  WorkbookName: string;
-  examDate: string;
-}
+import { BookData, Records } from '../types';
+
 interface BookInfoProps {
-  books: Book;
+  books: BookData;
   recordList: Records[];
   recordCount: number;
   movePage: (value: string) => void;
@@ -110,8 +99,9 @@ const exclusiveStyles = StyleSheet.create({
   btncontainer: {
     flex: 1,
     flexDirection: 'column',
+    backgroundColor: 'green',
     width: '100%',
-    paddingBottom: 30,
+    paddingBottom: 90,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },

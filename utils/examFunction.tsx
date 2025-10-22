@@ -41,8 +41,8 @@ export const MarkingWorkbook = (userAnswer: UserAnswer[], correctAnswer: Correct
 };
 //시험기록 저장
 export const saveExamResult = async (userInfo: UserInfo, examResult: SaveRecordResult[], correctCount: number, ExamBook: BookData) => {
-  const aId = userInfo.AcademyID;
-  const uId = userInfo.id;
+  const aId = userInfo.hashedAcademyId;
+  const uId = userInfo.hashedUserId;
   const resultData = {
     academy: aId,
     user: uId,

@@ -42,7 +42,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
     try
     {
       const response = await api.get('/workbook/list',{
-        params : {academyId : userInfo.AcademyID},
+        params : {academyId : userInfo.hashedAcademyId},
       });
       if(response)
       {
@@ -67,9 +67,9 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
 
       if (storedUserInfo)
       {
-        if (storedUserInfo && storedUserInfo.AcademyID)
+        if (storedUserInfo && storedUserInfo.info.hashedAcademyId)
         {
-          setUserInfo(storedUserInfo);
+          setUserInfo(storedUserInfo.info);
         }
         else
         {

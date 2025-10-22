@@ -9,23 +9,27 @@ export type Records =
 export type RefineData =
 {
   userId: string;
-  userName: string;
   academyId: string;
   workbookId: string;
 }
 export type BookData =
 {
   Difficulty: string;
-  storageLink: string;
   workbookId: string;
   workbookName: string;
 }
+export type LocalBookData =
+{
+  Difficulty: string;
+  workbookId: string;
+  workbookName: string;
+  storageLink: string;
+}
 export type UserInfo =
 {
-  AcademyID: string;
-  id: string;
+  hashedAcademyId: string;
+  hashedUserId: string;
   ok: string;
-  userName: string;
   UserType: string;
 }
 export type UserAnswer =

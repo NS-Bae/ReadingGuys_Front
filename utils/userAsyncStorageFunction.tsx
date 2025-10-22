@@ -13,7 +13,6 @@ export const getUserInfo = async () => {
     if(rawUserInfo !== null)
     {
       const parsedUserInfo = JSON.parse(rawUserInfo);
-
       return parsedUserInfo.info;
     }
     else

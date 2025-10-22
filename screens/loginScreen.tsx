@@ -11,7 +11,8 @@ import Styles from '../mainStyle.tsx';
 import Mt from '../Components/text.tsx';
 import Ti from '../Components/textinput.tsx';
 import Ca from '../Components/alert.tsx';
-import api from '../api.tsx';
+
+import { NormalLogIn } from '../utils/authFunction.tsx';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Login'>;
 
@@ -45,7 +46,7 @@ function LoginScreen({ navigation } : LoginScreenProps): React.JSX.Element {
     {
       try
       {
-        const response = await api.post('/auth/login', inputs);
+        const response = await NormalLogIn(inputs);
         if(response.status === 201 )
         {
           setSsa(true);

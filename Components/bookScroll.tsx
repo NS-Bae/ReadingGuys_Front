@@ -76,9 +76,8 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
         setSK(nowBookInfo);
 
         const refineData = {
-          userId: userInfo.id,
-          userName: userInfo.userName,
-          academyId: userInfo.AcademyID,
+          userId: userInfo.hashedUserId,
+          academyId: userInfo.hashedAcademyId,
           workbookId: nowBookInfo.workbookId,
         };
         const RecordList = await loadExamRecord(refineData);
