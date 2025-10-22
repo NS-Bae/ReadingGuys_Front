@@ -29,7 +29,6 @@ export const downloadedBook = async (book: BookData): Promise<void> => {
 export const downloadWorkbookFile = async ( book: BookData ): Promise<string | null> => {
   try
   {
-    console.log('gggggggerww', book);
     const response = await api.post('/workbook/download', book, { responseType: 'blob' });
 
     const reader = new FileReader();
