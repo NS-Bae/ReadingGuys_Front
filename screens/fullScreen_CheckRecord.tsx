@@ -30,7 +30,7 @@ function CheckRecordScreen()
 
       if (storedUserInfo)
       {
-        if (storedUserInfo && storedUserInfo.AcademyID)
+        if (storedUserInfo && storedUserInfo.info.hashedAcademyId)
         {
           setUserInfo(storedUserInfo);
         }
@@ -57,7 +57,7 @@ function CheckRecordScreen()
   const recordDetail = (recordLink: string) => {
     setRecordURL(recordLink);
     setRecordModalVisible(true);
-    console.log(recordLink);
+    console.log(recordModalVisible, recordLink);
   };
 
   return (
@@ -67,7 +67,7 @@ function CheckRecordScreen()
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.tfContainer}>
-        <Mt title={`내 ${bookInfo.workbookName} 시험 기록`} titleStyle={styles.normal} />
+        <Mt title={`${bookInfo.workbookName} 시험 기록`} titleStyle={styles.normal} />
       </View>
       <View style={exclusiveStyles.basic} >
       {RecordList.length > 0 ? (

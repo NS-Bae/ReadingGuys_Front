@@ -118,6 +118,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   };
   const toggleCloseDrawer = () => {
     setIsOpen(!isOpen);
+    console.log(isOpen);
   };
   const toggleDrawerContent = (key: string) => {
     console.log(key);
