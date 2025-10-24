@@ -138,3 +138,15 @@ export const syncDownloadedBooks = async (): Promise<BookData[]> => {
     return [];
   }
 };
+
+export const clearAllStorage = async () => {
+  await clearAuthStorage();
+  /* try
+  {
+    await AsyncStorage.clear();
+  }
+  catch(error)
+  {
+    console.error('로그아웃 중 오류 발생:', error);
+  } */
+};

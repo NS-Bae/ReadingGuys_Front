@@ -28,6 +28,9 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ toggleCloseDrawer, toggle
           <Text style={styles.closeButtonText}>사업자 정보</Text>
         </TouchableOpacity>
       </ScrollView >
+      <TouchableOpacity key="out" onPress={() => toggleDrawerContent('out')} style={styles.closeButton}>
+        <Text style={styles.closeButtonText}>로그아웃</Text>
+      </TouchableOpacity>
       <TouchableOpacity key="close" onPress={toggleCloseDrawer} style={styles.closeButton}>
         <Text style={styles.closeButtonText}>닫기</Text>
       </TouchableOpacity>

@@ -16,6 +16,7 @@ import api from '../api.tsx';
 import RM from '../Components/recordModal.tsx';
 import DrawerContent from '../Components/infoSideBarComponent.tsx';
 import { moderateScale } from 'react-native-size-matters';
+import { NormalLogOut } from '../utils/authFunction.tsx';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
 
@@ -120,6 +121,12 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   };
   const toggleDrawerContent = (key: string) => {
     console.log(key);
+    if(key === 'out')
+    {
+      console.log(key);
+      NormalLogOut();
+      navigation.navigate('Home');
+    }
   };
   //사용자정보 가져오기
   useEffect(() => {
