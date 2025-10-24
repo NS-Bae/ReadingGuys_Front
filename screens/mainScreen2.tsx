@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { moderateScale } from 'react-native-size-matters';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Records, StackParamList, UserInfo } from '../types.tsx';
 import { AxiosError } from 'axios';
 import SideDrawer from 'react-native-side-drawer';
 
 import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
 
-import { BookData } from '../types.tsx';
+import { BookData, Records, StackParamList, UserInfo } from '../types.tsx';
 
 import Styles from '../mainStyle.tsx';
 import BookScroll from '../Components/bookScroll.tsx';
@@ -15,7 +15,9 @@ import BookInfo from '../Components/bookinfo.tsx';
 import api from '../api.tsx';
 import RM from '../Components/recordModal.tsx';
 import DrawerContent from '../Components/infoSideBarComponent.tsx';
-import { moderateScale } from 'react-native-size-matters';
+import OM from '../Components/otherModal.tsx';
+import IM from '../Components/other2Modal.tsx';
+
 import { NormalLogOut } from '../utils/authFunction.tsx';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
@@ -34,6 +36,9 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   const [recordURL, setRecordURL] = useState<string>('');
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isOtherModalOpen, setOtherModalIsOpen] = useState(false);
+  const [otherModalKey, setOtherModalKey] = useState<string>('');
+  const [isInfoModalOpen, setInfoModalIsOpen] = useState(false);
 
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
@@ -118,7 +123,18 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   };
   const toggleCloseDrawer = () => {
     setIsOpen(!isOpen);
-    console.log(isOpen);
+  };
+  const toggleOtherModalOpen = () => {
+    setOtherModalIsOpen(true);
+  };
+  const toggleOtherModalClose = () => {
+    setOtherModalIsOpen(false);
+  };
+  const toggleInfoModalOpen = () => {
+    setInfoModalIsOpen(true);
+  };
+  const toggleInfoModalClose = () => {
+    setInfoModalIsOpen(false);
   };
   const toggleDrawerContent = (key: string) => {
     console.log(key);
@@ -126,7 +142,19 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
     {
       console.log(key);
       NormalLogOut();
+      setIsOpen(false);
       navigation.navigate('Home');
+    }
+    else if(key === 'credits' || key === 'pi' || key === 'legal' || key === 'about')
+    {
+      setOtherModalKey(key);
+      toggleOtherModalOpen();
+      setIsOpen(false);
+    }
+    else if(key === 'info')
+    {
+      toggleInfoModalOpen();
+      setIsOpen(false);
     }
   };
   //사용자정보 가져오기
@@ -196,6 +224,21 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
           isModalVisible={recordModalVisible}
           onClose={() => setRecordModalVisible(false)}
           recordLink={recordURL}
+          userInfo={userInfo}
+        />
+      }
+      {isOtherModalOpen && userInfo &&
+        <OM
+          isModalVisible={isOtherModalOpen}
+          onClose={() => toggleOtherModalClose()}
+          userInfo={userInfo}
+          modalKey={otherModalKey}
+        />
+      }
+      {isInfoModalOpen && userInfo &&
+        <IM
+          isModalVisible={isInfoModalOpen}
+          onClose={() => toggleInfoModalClose()}
           userInfo={userInfo}
         />
       }

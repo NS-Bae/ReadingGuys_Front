@@ -26,8 +26,8 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
     }
   }, [recordLink]);
 
-  const uid = userInfo.id;
-  const aid = userInfo.AcademyID;
+  const uid = userInfo.hashedUserId;
+  const aid = userInfo.hashedAcademyId;
 
   useEffect(() => {
     const formData: ReadFileParams = {
@@ -98,7 +98,7 @@ const RecordModal: React.FC<RecordModalComponentProps> = ({ isModalVisible, reco
       </Modal>
     );
   }
-  console.log(answerData);
+
   return (
     <Modal
       isVisible={isModalVisible}
