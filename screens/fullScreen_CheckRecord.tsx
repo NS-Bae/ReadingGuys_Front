@@ -9,10 +9,17 @@ import RecordItem from '../Components/recordItem.tsx';
 import Mt from '../Components/text.tsx';
 import RM from '../Components/recordModal.tsx';
 import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
+import { useBackHandler } from '../utils/customHooks.tsx';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+type RecordScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Record'>;
 type RecordScreenRouteProp = RouteProp<StackParamList, 'Record'>;
+interface CheckRecordScreenProps
+{
+  navigation: RecordScreenNavigationProp;
+}
 
-function CheckRecordScreen()
+function CheckRecordScreen({ navigation } : CheckRecordScreenProps): React.JSX.Element
 {
   const { width } = useWindowDimensions();
   const styles = Styles(width);
@@ -22,6 +29,10 @@ function CheckRecordScreen()
   const [userInfo, setUserInfo] = useState<UserInfo>();
   const [recordURL, setRecordURL] = useState<string>('');
   const [recordModalVisible, setRecordModalVisible] = useState(false);
+  useBackHandler(async() => {
+    navigation.navigate('Main');
+    return true;
+  });
 
   const fetchUserInfo = async () => {
     try
