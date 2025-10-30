@@ -74,9 +74,6 @@ export const verifyAndHandleToken = async (): Promise<boolean> => {
 };
 
 export const registTokenAndInfo = async(token: string, info: string) => {
-
-  console.log('q', token, info);
-
   await Keychain.setGenericPassword('jwt', token);
 
   // 사용자 정보는 EncryptedStorage에 저장
@@ -92,7 +89,6 @@ export const getDownloadedBooks = async (): Promise<BookData[]> => {
   try
   {
     const rawDownloadedBookList = await AsyncStorage.getItem('downloadedBooks');
-
     if(rawDownloadedBookList !== null)
     {
       const parsedDownloadedBookList = JSON.parse(rawDownloadedBookList);
@@ -125,7 +121,8 @@ export const syncDownloadedBooks = async (): Promise<BookData[]> => {
 
     // AsyncStorage에 저장된 책 중, 실제로 존재하는 파일만 필터링
     const syncedBooks = downloadedBooks.filter((book) => {
-      const expectedFileName = `${book.workbookId}_${book.workbookName}.zip`;
+      const safeBookName = book.workbookName.replace(/\s+/g, '_');
+      const expectedFileName = `${book.workbookId}_${safeBookName}.zip`;
       return existingFileNames.includes(expectedFileName);
     });
 
@@ -142,12 +139,4 @@ export const syncDownloadedBooks = async (): Promise<BookData[]> => {
 
 export const clearAllStorage = async () => {
   await clearAuthStorage();
-  /* try
-  {
-    await AsyncStorage.clear();
-  }
-  catch(error)
-  {
-    console.error('로그아웃 중 오류 발생:', error);
-  } */
 };

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { BackHandler, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { moderateScale } from 'react-native-size-matters';
 
 import { SaveRecordResult, StackParamList, UserInfo } from '../types';
 
-import { getUserInfo } from '../utils/userAsyncStorageFunction';
+import { getUserInfo, verifyAndHandleToken } from '../utils/userAsyncStorageFunction';
 import { saveExamResult } from '../utils/examFunction';
+import { useBackHandler } from '../utils/customHooks';
 
 type ExamResultScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Result'>;
 type ExamResultScreenRouteProp = RouteProp<StackParamList, 'Result'>;
@@ -22,19 +23,19 @@ function ExamResultScreen({ navigation }: ExamResultScreenProps): React.JSX.Elem
   const route = useRoute<ExamResultScreenRouteProp>();
   const { ExamResult, ExamBook, fileNames } = route.params;
   //기본 뒤로가기 커스텀
-  useEffect(() => {
-    const onBackPress = () => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
-      return true;
-    };
+  useBackHandler(async () => {
+    const verifyTokenValue = await verifyAndHandleToken();
 
-    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-    return () => subscription.remove();
-  }, [navigation]);
+    if(verifyTokenValue)
+    {
+      navigation.navigate('Main');
+    }
+    else
+    {
+      navigation.navigate('Login');
+    }
+    return true;
+  });
 
   useEffect(() => {
     const fetchInfo = async () => {

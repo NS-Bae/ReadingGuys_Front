@@ -2,23 +2,23 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AxiosError } from 'axios';
 import SideDrawer from 'react-native-side-drawer';
-
-import { getUserInfo } from '../utils/userAsyncStorageFunction.tsx';
 
 import { BookData, Records, StackParamList, UserInfo } from '../types.tsx';
 
 import Styles from '../mainStyle.tsx';
 import BookScroll from '../Components/bookScroll.tsx';
 import BookInfo from '../Components/bookinfo.tsx';
-import api from '../api.tsx';
 import RM from '../Components/recordModal.tsx';
 import DrawerContent from '../Components/infoSideBarComponent.tsx';
 import OM from '../Components/otherModal.tsx';
 import IM from '../Components/other2Modal.tsx';
 
 import { NormalLogOut } from '../utils/authFunction.tsx';
+import { requestWorkbookList } from '../utils/handleWorkbookFile.tsx';
+import { getUserInfo, syncDownloadedBooks, verifyAndHandleToken } from '../utils/userAsyncStorageFunction.tsx';
+
+import { useBackHandler } from '../utils/customHooks.tsx';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
 
@@ -42,27 +42,31 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
 
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
+  //뒤로가기 핸들러
+  useBackHandler(async () => {
+    const verifyTokenValue = await verifyAndHandleToken();
+
+    if(verifyTokenValue)
+    {
+      navigation.navigate('Home');
+    }
+    else
+    {
+      navigation.navigate('Login');
+    }
+    return true;
+  });
   //서버에 등록된 허용된 책리스트 불러오기
   const getBookList = useCallback(async () => {
     if (!userInfo) { return null; }
-    try
+    const bookData = await requestWorkbookList(userInfo.hashedAcademyId);
+    if(bookData)
     {
-      const response = await api.get('/workbook/list',{
-        params : {academyId : userInfo.hashedAcademyId},
-      });
-      if(response)
-      {
-        setBookList(response.data);
-      }
-      else
-      {
-        console.log(response, '실패');
-      }
+      setBookList(bookData);
     }
-    catch(error)
+    else
     {
-      const axiosError = error as AxiosError;
-      console.log('b',axiosError);
+      console.log(bookData, '실패');
     }
   }, [userInfo]);
   //사용자 정보 가져오기
@@ -137,7 +141,6 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
     setInfoModalIsOpen(false);
   };
   const toggleDrawerContent = (key: string) => {
-    console.log(key);
     if(key === 'out')
     {
       console.log(key);
@@ -160,6 +163,7 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   //사용자정보 가져오기
   useEffect(() => {
     fetchUserInfo();
+    syncDownloadedBooks();
   }, []);
   useEffect(() => {
     getBookList();

@@ -1,11 +1,13 @@
 import { unzip } from 'react-native-zip-archive';
 import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
 import { Alert } from 'react-native';
+import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from '../api.tsx';
-import { BookData, LocalBookData } from '../types.tsx';
+import { BookData } from '../types.tsx';
 import { getDownloadedBooks } from './userAsyncStorageFunction.tsx';
+import { AxiosError } from 'axios';
 
 /**
  * ZIP 파일을 해제하고 내부 텍스트 파일 이름 및 내용 반환
@@ -29,67 +31,42 @@ export const downloadedBook = async (book: BookData): Promise<void> => {
 export const downloadWorkbookFile = async ( book: BookData ): Promise<string | null> => {
   try
   {
-    const response = await api.post('/workbook/download', book, { responseType: 'blob' });
+    const response = await api.post('/workbook/download', book, { responseType: 'arraybuffer' });
 
-    const reader = new FileReader();
+    const downloadedData = Buffer.from(response.data, 'binary').toString('base64');
 
-    return await new Promise((resolve, reject) => {
-      reader.onloadend = async () => {
-        if (typeof reader.result === 'string')
-        {
-          try {
-            const convertData = reader.result.split(',')[1];
-            const localPath = `${RNFS.DocumentDirectoryPath}/${book.workbookId}_${book.workbookName}.zip`;
-            await RNFS.writeFile(localPath, convertData, 'base64');
+    const safeName = book.workbookName.replace(/\s+/g, '_');
+    const localPath = `${RNFS.DocumentDirectoryPath}/${book.workbookId}_${safeName}.zip`;
+    await RNFS.writeFile(localPath, downloadedData, 'base64');
 
-            const savedBooks = await AsyncStorage.getItem('downloadedBooks');
-            const booksInStorage: BookData[] = savedBooks ? JSON.parse(savedBooks) : [];
+    const savedBooks = await AsyncStorage.getItem('downloadedBooks');
+    const booksInStorage: BookData[] = savedBooks ? JSON.parse(savedBooks) : [];
 
-            const isDuplicate = booksInStorage.some(
-              (books: BookData) =>
-                books.workbookId === book.workbookId &&
-                books.workbookName === book.workbookName
-            );
+    const isDuplicate = booksInStorage.some(
+      (books: BookData) =>
+        books.workbookId === book.workbookId &&
+        books.workbookName === book.workbookName
+    );
 
-            if(!isDuplicate)
-            {
-              const newBook: LocalBookData = {
-                workbookId: book.workbookId,
-                Difficulty: book.Difficulty,
-                workbookName: book.workbookName,
-                storageLink: localPath,
-              };
-
-              const updatedBooks = [...booksInStorage, newBook];
-              await AsyncStorage.setItem('downloadedBooks', JSON.stringify(updatedBooks));
-            }
-            else
-            {
-              console.log('이미 저장된 책입니다.');
-            }
-
-            resolve(localPath);
-          }
-          catch(error)
-          {
-            console.error('파일 저장 또는 AsyncStorage 처리 오류:', error);
-            reject(null);
-          }
-        }
-        else
-        {
-          Alert.alert('파일 처리 오류', '파일을 변환하는 중 오류가 발생했습니다.');
-          reject(null);
-        }
+    if(!isDuplicate)
+    {
+      const newBook: BookData = {
+        workbookId: book.workbookId,
+        Difficulty: book.Difficulty,
+        workbookName: book.workbookName,
+        storageLink: localPath,
       };
 
-      reader.onerror = () => {
-        Alert.alert('파일 처리 오류', '파일 읽기 중 오류가 발생했습니다.');
-        reject(null);
-      };
+    const updatedBooks = [...booksInStorage, newBook];
+    console.log(updatedBooks);
+    await AsyncStorage.setItem('downloadedBooks', JSON.stringify(updatedBooks));
+  }
+  else
+  {
+    console.log('이미 저장된 책입니다.');
+  }
 
-      reader.readAsDataURL(response.data);
-    });
+  return localPath;
   }
   catch(error)
   {
@@ -99,32 +76,41 @@ export const downloadWorkbookFile = async ( book: BookData ): Promise<string | n
 };
 //압축해제
 export const extractZipAndReadTextFiles = async (filePath: string, workbookName: string) => {
+  const safeName = workbookName.replace(/\s+/g, '_');
+  const targetPath = `${DocumentDirectoryPath}/unzipped/${safeName}`;
+  const unzippedPath = await unzip(filePath, targetPath);
+  const files = await RNFS.readDir(unzippedPath);
+  const firstFolder = files.find(item => item.isDirectory());
+
+  if(!firstFolder)
+  {
+    throw new Error('압축 해제된 폴더가 존재하지 않습니다.');
+  }
+  const folderPath = firstFolder.path;
+  const innerFiles = await RNFS.readDir(folderPath);
+
+  const txtFiles = innerFiles
+    .filter(item => item.isFile() && item.name.endsWith('.txt'));
+  const textFileNames = txtFiles.map(item => item.name.replace(/\.txt$/, ''));
+  const textFileContents = await Promise.all(
+    txtFiles.map(item => RNFS.readFile(item.path, 'utf8'))
+  );
+
+  return { textFileNames, textFileContents };
+};
+
+export const requestWorkbookList = async (hashedData: string): Promise<BookData[] | null> => {
   try
   {
-    const targetPath = `${DocumentDirectoryPath}/unzipped/${workbookName}`;
-    const unzippedPath = await unzip(filePath, targetPath);
-    const files = await RNFS.readDir(unzippedPath);
-    const firstFolder = files.find(item => item.isDirectory());
-
-    if(!firstFolder)
-    {
-      throw new Error('압축 해제된 폴더가 존재하지 않습니다.');
-    }
-    const folderPath = firstFolder.path;
-    const innerFiles = await RNFS.readDir(folderPath);
-
-    const txtFiles = innerFiles
-      .filter(item => item.isFile() && item.name.endsWith('.txt'));
-    const textFileNames = txtFiles.map(item => item.name.replace(/\.txt$/, ''));
-    const textFileContents = await Promise.all(
-      txtFiles.map(item => RNFS.readFile(item.path, 'utf8'))
-    );
-
-    return { textFileNames, textFileContents };
+    const bookData = await api.get('/workbook/list', { params: { hashedAcademyId: hashedData } });
+    return bookData.data;
   }
-  catch (error)
+  catch(error)
   {
-    console.error('❌ 파일 처리 중 오류 발생:', error);
-    throw error;
+    const axiosError = error as AxiosError;
+    console.log('b',axiosError);
+    return null;
   }
 };
+
+

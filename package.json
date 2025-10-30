@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "preandroid": "powershell -Command \"if (!(Test-Path 'android/app/src/main/assets/txtfile')) { New-Item -ItemType Directory -Path 'android/app/src/main/assets/txtfile' } ; Copy-Item -Recurse -Force 'assets/txtfile/*' 'android/app/src/main/assets/txtfile/'\"",    "android": "npm run preandroid && react-native run-android",
+    "preandroid": "powershell -Command \"if (!(Test-Path 'android/app/src/main/assets/txtfile')) { New-Item -ItemType Directory -Path 'android/app/src/main/assets/txtfile' } ; Copy-Item -Recurse -Force 'assets/txtfile/*' 'android/app/src/main/assets/txtfile/'\"",
+    "android": "npm run preandroid && react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
@@ -17,6 +18,7 @@
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/native-stack": "^7.3.10",
     "axios": "^1.8.4",
+    "buffer": "^6.0.3",
     "crypto": "^1.0.1",
     "jwt-decode": "^4.0.0",
     "react": "19.0.0",

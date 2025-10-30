@@ -17,13 +17,7 @@ export type BookData =
   Difficulty: string;
   workbookId: string;
   workbookName: string;
-}
-export type LocalBookData =
-{
-  Difficulty: string;
-  workbookId: string;
-  workbookName: string;
-  storageLink: string;
+  storageLink?: string;
 }
 export type UserInfo =
 {

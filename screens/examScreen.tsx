@@ -3,14 +3,15 @@ import { SafeAreaView, StyleSheet, Text, View, useWindowDimensions } from 'react
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
-import { MarkingWorkbook } from '../utils/examFunction.tsx';
-import { extractZipAndReadTextFiles } from '../utils/handleWorkbookFile.tsx';
+import { StackParamList, UserAnswer, CorrectAnswer } from '../types.tsx';
 
 import Styles from '../mainStyle.tsx';
 import ExamSplitScreen from '../Components/examSplitScreen.tsx';
 import ExamFullScreen from '../Components/examFullScreen.tsx';
 
-import { StackParamList, UserAnswer, CorrectAnswer } from '../types.tsx';
+import { useDisableBackHandler } from '../utils/customHooks.tsx';
+import { MarkingWorkbook } from '../utils/examFunction.tsx';
+import { extractZipAndReadTextFiles } from '../utils/handleWorkbookFile.tsx';
 
 type ExamScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Exam'>;
 type ExamScreenRouteProp = RouteProp<StackParamList, 'Exam'>;
@@ -32,6 +33,8 @@ function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
   const [fileContents, setFileContents] = useState<string[]>([]);
   const [userAnswer, setUserAnswer] = useState<UserAnswer[]>([]);
   const [correctAnswer, setCorrectAnswer] = useState<CorrectAnswer[]>([]);
+
+  useDisableBackHandler();
 
   async function handleZipFile(filePath: string)
   {
@@ -98,8 +101,6 @@ function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
   }, [ExamBook]);
 
   const toggleEnd = () => {
-    console.log('end', userAnswer, correctAnswer, fileNames);
-
     const results = MarkingWorkbook(userAnswer, correctAnswer);
     results.forEach((res) => {
       console.log(

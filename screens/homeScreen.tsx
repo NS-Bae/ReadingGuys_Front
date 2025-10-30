@@ -21,6 +21,7 @@ function MainScreen({ navigation } : MainScreenProps): React.JSX.Element {
 
   const handleStBt = async () => {
     const isTokenValid = await verifyAndHandleToken();
+    console.log(isTokenValid);
     if(!isTokenValid)
     {
       navigation.navigate('Login');
