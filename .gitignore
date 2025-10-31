@@ -77,5 +77,10 @@ yarn-error.log
 
 
 .env
-assets/txtFile/*.txt
+assets/txtFile/*
 assets/txtFile/Terms.txt
+assets
+assets/txtFile/Policy of Handling Personal Information.txt
+assets/txtFile/Policy of Handling Personal Information.txt
+assets/txtFile/Credit.txt
+assets/txtFile/Business Information.txt
