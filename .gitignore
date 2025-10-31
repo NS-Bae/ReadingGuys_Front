@@ -78,3 +78,4 @@ yarn-error.log
 
 .env
 assets/txtFile/*.txt
+assets/txtFile/Terms.txt
