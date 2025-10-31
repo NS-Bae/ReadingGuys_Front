@@ -22,6 +22,8 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 android/app/src/main/assets
+assets
+**/assets/
 # Android/IntelliJ
 #
 build/
@@ -75,3 +77,4 @@ yarn-error.log
 
 
 .env
+assets/txtFile/*.txt
