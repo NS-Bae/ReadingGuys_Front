@@ -1,6 +1,6 @@
 import { unzip } from 'react-native-zip-archive';
 import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -113,4 +113,31 @@ export const requestWorkbookList = async (hashedData: string): Promise<BookData[
   }
 };
 
+//read txtfile
+export const loadTextFile = async (fileName: string): Promise<string | null> => {
+  try
+  {
+    let path = '';
+    if(Platform.OS === 'ios')
+    {
+      path = `${RNFS.MainBundlePath}/${fileName}.txt`;
+      const fileData = await RNFS.readFile(path, 'utf8');
+      return fileData;
+    }
+    else
+    {
+      const assetName = `txtFile/${fileName}.txt`;
+      const localPath = `${RNFS.DocumentDirectoryPath}/${fileName}.txt`;
 
+      await RNFS.copyFileAssets(assetName, localPath);
+      const fileData = await RNFS.readFile(localPath, 'utf8');
+      return fileData;
+    }
+  }
+  catch(error)
+  {
+    console.error('파일 읽기 실패:', error);
+    Alert.alert('파일 오류', `${fileName} 파일을 불러올 수 없습니다.`);
+    return null;
+  }
+};

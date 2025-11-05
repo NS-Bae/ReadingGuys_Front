@@ -1,3 +1,7 @@
+export type loginDto = {
+  ip1: string;
+  ip2: string;
+}
 export type Records =
 {
   ExamDate: string;
@@ -61,4 +65,13 @@ export type ReadFileParams = {
   uid: string;
   aid: string;
   recordLink: string;
+}
+export type decryptedUserInfo = {
+  hashedUserId: string;
+  rawUserId: string;
+  rawUserName: string;
+  hashedAcademyId: string;
+  rawAcademyName: string;
+  userType: string;
+  ok: boolean;
 }

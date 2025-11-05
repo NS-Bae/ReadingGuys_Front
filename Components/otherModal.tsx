@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet, Platform, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import Modal from 'react-native-modal';
 import { moderateScale } from 'react-native-size-matters';
-import RNFS from 'react-native-fs';
 
 import { UserInfo } from '../types';
+import { loadTextFile } from '../utils/handleWorkbookFile';
 
 
 interface OtherModalComponentProps
@@ -17,48 +17,47 @@ interface OtherModalComponentProps
 
 const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClose, userInfo, modalKey }) => {
   const [data, setData] = useState<string | null>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  let fileTag = '';
 
+  switch(modalKey)
+  {
+    case 'credits': fileTag = 'Credit'; break;
+    case 'legal': fileTag = 'Terms'; break;
+    case 'pi': fileTag = 'Policy of Handling Personal Information'; break;
+    case 'about': fileTag = 'Business Information'; break;
+    default : fileTag = ''; break;
+  }
   useEffect(() => {
-    let fileTag = '';
-    switch(modalKey)
-    {
-      case 'credits': fileTag = 'Credit'; break;
-      case 'legal': fileTag = 'Terms'; break;
-      case 'pi': fileTag = 'Policy of Handling Personal Information'; break;
-      case 'about': fileTag = 'Business Information'; break;
-      default : fileTag = ''; break;
-    }
-    if(fileTag)
-    {
-      loadTextFile(fileTag);
-    }
-  }, [modalKey]);
-  const loadTextFile = async (fileName: string) => {
-    try
-    {
-      let path = '';
-      if(Platform.OS === 'ios')
+    (async () => {
+      if(fileTag === '')
       {
-        path = `${RNFS.MainBundlePath}/${fileName}.txt`;
-        const fileData = await RNFS.readFile(path, 'utf8');
-        setData(fileData);
+        return;
       }
-      else
-      {
-        const assetName = `txtfile/${fileName}.txt`;
-        const localPath = `${RNFS.DocumentDirectoryPath}/${fileName}.txt`;
 
-        await RNFS.copyFileAssets(assetName, localPath);
-        const fileData = await RNFS.readFile(localPath, 'utf8');
-        setData(fileData);
+      try
+      {
+        setIsLoading(true);
+        if(fileTag)
+        {
+          const fileData = await loadTextFile(fileTag);
+          if(fileData !== null)
+          {
+            setData(fileData);
+          }
+        }
       }
-    }
-    catch(error)
-    {
-      console.error('파일 읽기 실패:', error);
-      setData('파일을 불러올 수 없습니다.');
-    }
-  };
+      catch(error)
+      {
+        console.error('파일 로드 실패:', error);
+      }
+      finally
+      {
+        setIsLoading(false);
+      }
+    })();
+  }, [fileTag]);
+
   console.log(modalKey, userInfo);
   return (
     <Modal
@@ -73,12 +72,14 @@ const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClos
           <Text style={styles.closeButtonText}>닫기</Text>
         </TouchableOpacity>
         <View style={styles.infoArea}>
-        {data === null ? (
+        {isLoading ? (
             <ActivityIndicator size="large" color="blue" />
-          ) : (
+          ) : data ? (
             <ScrollView>
               <Text style={{ fontSize: 16, lineHeight: 24 }}>{data}</Text>
             </ScrollView>
+          ) : (
+            <Text>불러올 파일이 없습니다.</Text>
           )}
         </View>
       </View>

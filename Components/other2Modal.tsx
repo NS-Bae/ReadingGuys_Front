@@ -1,18 +1,43 @@
-import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import Modal from 'react-native-modal';
 import { moderateScale } from 'react-native-size-matters';
+import { useEffect, useState } from 'react';
 
-import { UserInfo } from '../types';
+import { getMyInfo } from '../utils/authFunction';
+import { decryptedUserInfo } from '../types';
 
 interface OtherModalComponentProps
 {
   isModalVisible: boolean;
   onClose: () => void;
-  userInfo: UserInfo;
 }
 
-const Other2Modal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClose, userInfo }) => {
-  console.log(userInfo);
+const Other2Modal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClose }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [data, setData] = useState<decryptedUserInfo | null>();
+
+  useEffect(() => {
+    (async () => {
+      try
+      {
+        setIsLoading(true);
+        const infoData = await getMyInfo();
+        if(infoData)
+        {
+          setData(infoData);
+        }
+      }
+      catch(error)
+      {
+        console.error('정보 처리 실패:', error);
+      }
+      finally
+      {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
   return (
     <Modal
       isVisible={isModalVisible}
@@ -26,7 +51,15 @@ const Other2Modal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClo
           <Text style={styles.closeButtonText}>닫기</Text>
         </TouchableOpacity>
         <View style={styles.infoArea}>
-          <ActivityIndicator size="large" color="blue" />
+          {isLoading ? (
+            <ActivityIndicator size="large" color="blue" />
+          ) : data ? (
+            <ScrollView>
+              <Text style={{ fontSize: 16, lineHeight: 24 }}>{data.rawUserId}</Text>
+            </ScrollView>
+          ) : (
+            <Text>불러올 데이터가 없습니다.</Text>
+          )}
         </View>
       </View>
     </Modal>
