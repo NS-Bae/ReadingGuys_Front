@@ -19,13 +19,16 @@ const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClos
   const [data, setData] = useState<string | null>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   let fileTag = '';
+  let modalType = '';
 
   switch(modalKey)
   {
-    case 'credits': fileTag = 'Credit'; break;
-    case 'legal': fileTag = 'Terms'; break;
-    case 'pi': fileTag = 'Policy of Handling Personal Information'; break;
-    case 'about': fileTag = 'Business Information'; break;
+    case 'credits': fileTag = 'Credit'; modalType = 'normal'; break;
+    case 'legal': fileTag = 'Terms'; modalType = 'normal'; break;
+    case 'pi': fileTag = 'Policy of Handling Personal Information'; modalType = 'normal'; break;
+    case 'about': fileTag = 'Business Information'; modalType = 'normal'; break;
+    case 'agree_legal': fileTag = 'Terms'; modalType = 'agreement'; break;
+    case 'agree_pi': fileTag = 'Policy of Handling Personal Information'; modalType = 'agreement'; break;
     default : fileTag = ''; break;
   }
   useEffect(() => {
@@ -76,12 +79,22 @@ const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClos
             <ActivityIndicator size="large" color="blue" />
           ) : data ? (
             <ScrollView>
-              <Text style={{ fontSize: 16, lineHeight: 24 }}>{data}</Text>
+              <Text style={styles.infoText}>{data}</Text>
             </ScrollView>
           ) : (
-            <Text>불러올 파일이 없습니다.</Text>
+            <Text style={styles.infoText}>불러올 파일이 없습니다.</Text>
           )}
         </View>
+        { modalType === 'agreement' && (
+          <View>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>동의합니다</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>동의하지 않습니다.</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </Modal>
   );
@@ -116,28 +129,11 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     color: 'black',
   },
-  infoTitileZone: {
-    flex: 1,
-    width: '100%',
-    marginVertical: 10,
-  },
   correct: {
     backgroundColor: '#d4edda',
   },
   incorrect: {
     backgroundColor: '#f8d7da',
-  },
-  infoTitileText:
-  {
-    fontSize: moderateScale(23),
-    textAlign: 'center',
-    fontWeight: 700,
-  },
-  infoZone: {
-    flex: 1,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
   },
   infoText: {
     fontSize: moderateScale(20),

@@ -243,7 +243,6 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
         <IM
           isModalVisible={isInfoModalOpen}
           onClose={() => toggleInfoModalClose()}
-          userInfo={userInfo}
         />
       }
     </>

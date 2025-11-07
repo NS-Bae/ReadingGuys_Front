@@ -1,10 +1,11 @@
-import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import { moderateScale } from 'react-native-size-matters';
 import { useEffect, useState } from 'react';
 
 import { getMyInfo } from '../utils/authFunction';
 import { decryptedUserInfo } from '../types';
+import InfoTable from './infoTable.tsx';
 
 interface OtherModalComponentProps
 {
@@ -54,9 +55,7 @@ const Other2Modal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClo
           {isLoading ? (
             <ActivityIndicator size="large" color="blue" />
           ) : data ? (
-            <ScrollView>
-              <Text style={{ fontSize: 16, lineHeight: 24 }}>{data.rawUserId}</Text>
-            </ScrollView>
+            <InfoTable info={data} />
           ) : (
             <Text>불러올 데이터가 없습니다.</Text>
           )}
@@ -70,55 +69,38 @@ export default Other2Modal;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 0.55,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     backgroundColor: 'white',
     maxWidth: 1000,
     width: '90%',
+    height: 'auto',
     padding: 20,
     borderRadius: 10,
+    position: 'relative',
   },
   infoArea: {
-    flex: 1,
-    width: '96%',
-    marginTop: moderateScale(25),
+    width: '100%',
+    justifyContent: 'center',
   },
   closeButton: {
     position: 'absolute',
     top: 10,
     right: 20,
-    zIndex: 10,
+    zIndex: 9999,
+    elevation: 5,
+    padding: 4,
   },
   closeButtonText: {
     fontSize: moderateScale(15),
     color: 'black',
-  },
-  infoTitileZone: {
-    flex: 1,
-    width: '100%',
-    marginVertical: 10,
   },
   correct: {
     backgroundColor: '#d4edda',
   },
   incorrect: {
     backgroundColor: '#f8d7da',
-  },
-  infoTitileText:
-  {
-    fontSize: moderateScale(23),
-    textAlign: 'center',
-    fontWeight: 700,
-  },
-  infoZone: {
-    flex: 1,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-  },
-  infoText: {
-    fontSize: moderateScale(20),
   },
 });
