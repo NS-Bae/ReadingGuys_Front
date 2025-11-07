@@ -13,9 +13,10 @@ interface OtherModalComponentProps
   onClose: () => void;
   userInfo: UserInfo;
   modalKey: string;
+  onCloseAgreement?: (params: string, value: 'Y' | 'N') => void;
 }
 
-const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClose, userInfo, modalKey }) => {
+const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClose, userInfo, modalKey, onCloseAgreement }) => {
   const [data, setData] = useState<string | null>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   let fileTag = '';
@@ -85,17 +86,17 @@ const OtherModal: React.FC<OtherModalComponentProps> = ({ isModalVisible, onClos
             <Text style={styles.infoText}>불러올 파일이 없습니다.</Text>
           )}
         </View>
-        { modalType === 'agreement' && (
-          <View>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>동의합니다</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>동의하지 않습니다.</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
+      { modalType === 'normal' && (
+        <View style={styles.agreementButtonSection}>
+          <TouchableOpacity style={styles.agreementButton} onPress={() => onCloseAgreement?.(modalKey, 'Y')}>
+            <Text style={styles.agreementButtonText}>동의합니다</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.agreementButton} onPress={() => onCloseAgreement?.(modalKey, 'N')}>
+            <Text style={styles.agreementButtonText}>동의하지 않습니다.</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </Modal>
   );
 };
@@ -129,13 +130,22 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     color: 'black',
   },
-  correct: {
-    backgroundColor: '#d4edda',
-  },
-  incorrect: {
-    backgroundColor: '#f8d7da',
-  },
   infoText: {
     fontSize: moderateScale(20),
   },
+  agreementButtonSection: {
+    maxWidth: 1000,
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: 'green',
+  },
+  agreementButton: {
+    backgroundColor: 'aliceblue',
+  },
+  agreementButtonText: {
+    fontSize: moderateScale(20),
+  }
 });
